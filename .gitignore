@@ -1,0 +1,3 @@
+#Esclusione dei file binari
+*.mod
+*.o

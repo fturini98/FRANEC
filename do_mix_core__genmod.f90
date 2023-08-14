@@ -1,0 +1,10 @@
+        !COMPILER-GENERATED INTERFACE MODULE: Mon May 28 09:46:38 2012
+        MODULE DO_MIX_CORE__genmod
+          INTERFACE 
+            SUBROUTINE DO_MIX_CORE(L1,L2,MAXME)
+              INTEGER(KIND=4) :: L1
+              INTEGER(KIND=4) :: L2
+              INTEGER(KIND=4) :: MAXME
+            END SUBROUTINE DO_MIX_CORE
+          END INTERFACE 
+        END MODULE DO_MIX_CORE__genmod

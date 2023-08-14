@@ -1,0 +1,25 @@
+FILE = franec
+FC = /home/matt/gcc-slo/bin/gfortran-slo 
+FOPT = -c -O3 -ffast-math -fno-automatic -fdefault-real-8 \
+	-fno-inline -fslo-instrument
+FLINK = -lrd
+FPROF = 
+
+OBJECTS= moduli.o \
+	atm_bh05.o atm_ck03.o atmos.o carbon.o ciacioLi_nstop_novisua.o \
+	condint2006.o cross-nacre.o cub.o elio.o epsi-nacre.o epsig.o eqlb.o \
+	evolut.o io.o stop_evolut.o\
+	extkappa.o fato.o fitta.o hbrezo.o henyey.o kappa.o idreli.o \
+	idro.o innes.o local.o maslos.o mixing.o neutr.o optim.o pastem.o \
+	plotta.o quatm.o resnuc.o routinedoc.o simq.o spline3.o splin.o\
+	stampa.o  state.o state_free.o supera.o sk.o veiove.o  xcotrin2006.o \
+	$(FILE).o 
+
+$(FILE) : $(OBJECTS) $(OBJECTS1)
+	$(FC) $(FPROF) $(FLINK) $(OBJECTS) $(OBJECTS1) -o $(FILE)
+
+$(OBJECTS): %.o: %.f90
+	$(FC)  $(FOPT) $(FPROF) $< 
+
+clean: 
+	rm $(OBJECTS) $(OBJECTS1) *.mod

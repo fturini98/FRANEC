@@ -1,0 +1,248 @@
+29/1
+- aggiunta routine inout per aprire i file di input e leggere i valori
+dei parametri
+- modificato nome file input da fort.4 a Modstart.in
+- modificato sistema di cache interno in kappa per velocizzare
+
+8/2
+- modificato formato del file Modstart.in
+- modificato main per rendere leggibile il flusso del codice
+
+18/4
+- modificate epsi e idro:
+    In idro e' stato aggiunto un controllo sui valori di equilibrio di
+    CNO, in modo da impedire abbondanze negative. Questo controllo
+    evita problemi della chimica che causano "farfalle".
+    In epsi e' stato aggiunto un controllo sul valore di H ritornato
+    da idro; se risulta superiore del 10% al valore di ingresso allora
+    scarta la soluzione di idro e imposta le abbondanze uguali a
+    quelle del mesh precedente.  Questo controllo evita problemi della
+    chimica che causano "farfalle".
+    In epsi e' stato aggiunti in ingresso un controllo sulle
+    abbondanze degli elementi leggeri. Se risultano negative
+    (probabilmente per effetto di diffusione) vengono impostati a
+    10-40. Questo controllo evita frequenti blocchi del codice in
+    quanto elimina casi in cui le abbondanze di elementi leggeri
+    vengono poi erroneamente calcolati a valori >> 1. 
+- modificata kappa in modo da entrere in opac quando necessario e in
+akappetta in cao contrario. Evitando di entrere in opac quando
+sicuramente non ci sono valori buoni nelle tabelle OPAL risparmio
+tempo.
+- modificata kappa inserendo una routine di interpolazione cubica "2D"
+che permette di risparmiere tempo dato che i valori delle x su cui
+interpolare risultano identici.  
+
+Il tempo di calcolo di 1000 modelli (M=0.78,z=10-4) passa da 2.33 min
+(valore assunto da qui come STD) a 2.20 min sul portatile (risparmio
+del 8.5% circa). 
+
+20/4
+- bound checking e controllo uso variabili inizializzate.
+  Modificate  epsi, stampa, kappa, fitta, optim, atmos, main
+- modificata state in modo da non calcolare grandezze interpolate non
+necessarie
+- modificato ciclo di kappa in modo da usare piu' razionalemente le
+cache xABCD 
+
+ Il tempo di esecuzione scende a 2.15 min (risparmio del 11.7% circa
+ rispetto a STD).
+
+23/4
+- Modifica a kappa e cub per utilizzare efficientemente la cache.
+Invece di interpolare a ogni ciclo in T e Y, salva i valori
+interpolati in RO in un vettore e solo alla fine chiama una routine di
+interpolazione vettoriale che fa il lavoro in T. Quindi questi valori
+sono interpolati anche in Y.
+
+Il tempo di esecuzione scende a 1.54 min (risparmio del 25.5% circa
+ rispetto a STD).
+Utilizando le flag   -no-prec-div -fp-model fast=2   per la
+ compilazione il tempo di esecuzione scende a 1.41 min.
+
+26/4
+- Modificata supera per implementare correttamente l'algoritmo di
+Newton per la soluzione dei polinomio di terzo grado.
+- Modifiicata kappa per chiamare makespline.
+- Modificata kappa per gestire in maniera ottimale la akappetta e la
+opac. Se trova un valore fuori da opac, esce e va direttamente a
+akappetta.
+- Modificata makespline per vettorializzare i loop.
+
+Il tempo di esecuzione scende a 1.33 min.
+
+27/4
+- Modificata kappa per gestire una cache per i valori di JY1.
+
+28/4
+- Modificata cinterp3, aggiungendo una routine vettoriale cinterp3b
+per il calcolo delle opacita' conduttive. 
+
+Il tempo di esecuzione di 500 modelli in fase avanzata scende da 1.06
+min a 57 sec. 
+
+29/4 
+- Modificata neutr per gestire la ricerca degli indici nelle tabelle
+da interpolare in maniera ottimale.
+
+30/4
+- Corretto un bug in sk per il calcolo di strong screen.
+- Modificata epsig per il ciclo di ricerca iniziale sull'indice
+L. Inserito schema di ricerca binaria.
+
+Il tempo di esecuzione sui 1100 modelli standard scende a 1.26 min.
+
+5/5
+- Modificata sk in modo da accettare le abbondanze in
+numero. Conseguenti modifiche a epsi e cross, in modo da passare a
+catena le abbondanze corrette. Eliminazione di un modulo superfluo.
+- Modifica a potekin in modo da accettare un indice per velocizzare le
+ricerche nella tabella. Modifica a kappa e potekin in modo da passare
+a potekin direttamente i logaritmi dei numeri atomici.
+- Correzione in epsi in modo da eliminare due bug: i vettori di massa
+e numero atomico non concordavano e gli schermi di LiBeB erano
+calcolati con le abbondanze nuove invece che con le vecchie come per
+gli altri elementi.
+- Modificate atm_bh e atm_ck per usare spline di NR e non spline3, che
+ora non e' piu' usata nel codice.
+
+Il tempo di esecuzione di 500 modelli in fase avanzata scende 51 sec.
+Il tempo di esecuzione sui 1100 modelli standard scende a 1.20 sec
+
+6/5 
+- Modificata epsi in modo che il calcolo su DLiBeB si fatto solo in
+presenza di idrogeno nel mesh.
+- Modificate epsi,cross,idro,idreli,elio,carbon in modo da passare fra
+loro direttamente il vettore S calcolato da cross (eliminazione di un
+modulo).
+- Modificate atm_bh,atm_ck,kappa per eliminare i moduli di spline3.
+- Modificate kappa,kappetta per eliminare il modulo di passaggio
+opacita' tra loro.
+- Eliminati i moduli atmosfera_bh,atmosfera_ck modificando atm_bh e
+atm_ck.
+
+12/5
+- Corretto bug in cross (versione f90: in combustione di carbonio
+l'ultima reazione era sbagliata).
+- Corretti bug in elio, idreli e carbon sull'uso di elementi del vettore
+Y non calcolati.
+- Reinserita spline3 in kappa, atm_bh e atm_ck mediante flag
+oldspline. Se e' settata a 1 nelle tre routine attiva la vecchia
+spline3.
+
+13/5
+- Modificate epsi e cross per spostare gestione DLiBeB in cross.
+_ Eliminate alcune variabili dichiarate e non utilizzate.
+
+14/5
+- Modificata cross sostituendo i rate vecchi con quelli di NACRE in
+IR=4, ove disponibili.
+_ Aggiunte due condizioni di arresto (-7, -9) in stop_evolut.
+
+18/5
+- Modificate idro e elio per vettorializzare due cicli.
+- Modificata opac per eliminare dei calcolo di log10 non
+indispensabili. Rimpiazzati con il calcolo della matrice logtab (solo
+alla prima iterazione), che viene poi usata nel corso
+dell'algoritmo. La modifica non e' completamene conservativa perche'
+il logaritmo nuovo viene calcolato vettorializzato e quello vecchio
+no. La differenza nei valori calcolati e' sulla 13ma cifra.
+
+19/5
+- Modificata supera per eliminare calcoli inutili prima del ritorno.
+
+20/5
+- Modificate main, ciacioLi per eliminazione moduli di comunicazione.
+
+24/5
+- Eliminati vari moduli modificando: main, cub, extkappa, atmos,
+quatm, pastem, optim, mixing, stampa, evolut, henyey, resnuc, innes.
+
+28/5
+- Scoperto bug (forse epsi+cross nuove). Ripristinato a 13/5.
+
+29/5
+- Eliminato bug in epsi. Ripristinato nuovo codice.
+
+31/5
+- Verificata l'esistenza di un problema "strano". Il nuovo codice in
+epsi produce una traccia differente da quella del vecchio codice. Il
+problema scompare se uso il nuovo codice, ma contemporaneamente
+calcolo (ma NON uso) il codice vecchio.
+Meglio usare il codice standard (al 13/5), comunque esistono problemi
+da cercare di capire meglio.
+
+4/6
+- Ripristinato supera "nuovo".
+- Eliminata condizione -7 in stop_evolut. Meglio avere solo condizioni
+fisiche certe per le condizioni di stop. Ci possono essere problemi se
+parto da che non sono l'inizio della PREMS.
+
+24/6
+- Ripristinate nuove epsi e cross (vedi nota 31/5).
+Esiste un problema di stabilita' numerica del codice: alcuni
+spostamenti (elementi leggeri) girano 
+esattamente uguali se forzo il modello FP precise, diversi se non lo
+forzo. Probabilmente alcune ottimizzazioni usano dei calcoli nei
+registri a precisione diversa rispetto alle memorie. Inoltre lo
+spostamento di GAM da epsi a cross (con nome S(33)) produce scostamento
+visibile nella traccia. Interessante e' il fatto che GAM e S(33)
+differsico al massimo di 5e-16 di precisione relativa. Questa
+differenza insignificante si ripercuote in maniera visibile sulla
+traccia, indicando un problema di stabilita' numerica.
+- Ripristinata ciacio senza moduli. Verificato che non esistono
+differenze nella traccia tra le due versioni di ciacio.
+
+2/7
+- Modificate innes e fato in moda da eliminare un modulo di
+collegamento.
+
+17/7
+- Completato inserimento pepper. Le differenze sono state inglobate
+nel codice franec. Resta fuori epsig, che risulta differente nei due
+eseguibili
+- Inserito calcolo dinamico EOS da driver. Modificato l'albero in
+archivioEOS/EOS. Modificati gli script. Inserito sistema di Makefile.
+
+22/7
+- Modificato schema di partenza pepper aggiungendo il file
+abbondanze-HB.in che contiene oltre alle abbondanze standard, anche
+le abbondanze di N,O del core di He cosi' come la z del core.
+
+4/8
+- Aggiunto sistema di generazione modstart per pepper (dir
+tools/per_pepper). 
+- Modificato starter per gestire HB.
+- Aggiunti parametri di scelta atmosfera in parametri.in
+- Modificati driver e lancia per gestire partenze non da PS. Vengono
+salvati da driver anche i file di input serviti per il modello.
+- Aggiunto file di output scenario.log letto da Creamod_pepper
+- Aggiunto file di output mixcno.dat letto da Creamod_pepper
+
+agosto
+- Modificata stampa per produrre CHIMICA.DAT e FISICA.DAT
+- Messo a punto sistema di gestione Modstart.in-pepper
+- Modificato franec per generare automaticamente i modelli di partenza
+da HB leggendo il file scansioneHB.in
+- Corretti bug in lancia, driver e creamod-pepper
+- Inserito sistema di generazione automatica di HB (tools/HB/HB.sh).
+- Aggiunto sistema di estrazione modelli chimici e fisici e di
+graficazione immediata.
+
+3/9
+- Corretto bug su vettore XX in epsi e sk. Gli assegnamenti di Na23
+erano messi in posti sbagliati. L'ordine corretto degli elementi,
+dalle routine elio e carbon e':
+  !  1=XH,     2=XHE3,   3=XHE4,    4=XC12,   5=XN14,
+  !  6=XO16,   7=XO18,   8=XNE20,   9=XNE22, 10=XMG24,
+  ! 11=XMG25, 12=XMG26, 13=XSI28,  14=XNEU,  15=XNA23,
+  ! 16=XC13,  17=XN15,  18=XO17,   19=XF19,  20=XNE21,
+  ! 21=XFE,   22=XLI6,  23=XLI7,   24=XBE,   25=XB
+  ! 26=XD
+
+6/9
+- Modificata ciacio per gestire inserimento di elementi in diffusione.
+E' suff. gestire il parametro M (num. elementi diffusi) e il vettore
+sel_ele, in cui mettere 1 per l'elemento che si vuole far diffondere.
+
+
+
