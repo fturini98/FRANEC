@@ -1,7 +1,7 @@
 # FRANEC
 Codice sorgente FRANEC modificato per considerare la cattura di WIMP da parte della stella.
 
-- esite un file **Documentazione.md** che contiene una sottospecie di documentazione per le modifiche al codice fatte riguardanti la DM.
+- esite un file [Documentazione.md](Documentazione/Documentazione.md) che contiene una sottospecie di documentazione per le modifiche al codice fatte riguardanti la DM.
 
 ## Git
 I comandi git funzionano solo sul server, è possibile clonare la cartella in locale, ma una volta fatto non è possibile più caricarare le modifiche nuovamente sul server a causa dei firewall (motivazione plausibile data da Matteo).
