@@ -80,6 +80,15 @@ program STELEV
 
   integer :: relax_step, max_relax_step = 50
 
+  !Abilita la presenza di Dark Matter stile WIMP//FRANCESCO
+  integer :: on_off_DM=1
+  if(on_off_DM==1) then
+      write(*,*)"MATERIA OSCURA: on"
+  else if(on_off_DM==0) then
+      write(*,*)"MATERIA OSCURA: off"
+  endif
+
+
   NABLA1 = -1
   fase = 0  ! indicatore della fase evolutiva raggiunta
   logCNO = 0  ! per monitorare il momento in cui loggare CNO per pepper
@@ -667,6 +676,11 @@ program STELEV
      if(IDIFF  ==  1 .and. nfine_diff /= 1 .and. IREAD /= 4) then 
         call ciacioLi(tempo,nmd,maxme,nsmorza, nsole, nfine_diff)
      endif
+
+     !Chiamo la funzione per calcolarmi la cattura della materia oscura.//FRANCESCO
+     if(on_off_DM==1)then
+      call Cattura_DM()
+      endif
 
      if(iread /= 4) then
         ! metto la comp. al mesh maxme uguale a quella maxme-1
