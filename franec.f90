@@ -4,6 +4,13 @@
 
 program STELEV
 
+! Vengono importati i vari moduli che servono a definire l'equivalente di 
+! variabili globali in C (Le loro definizioni si trovano in moduli.f90):
+!     - fisica: modulo contenente la matrice G, che contiene raggio etc...
+!     - chim: modulo contenente la variabile del passo temporale HT1
+!     - chimic: modulo contenente la matrice delle abbondanze XXX(MELE,LIM)
+!               dove MELE è il numero degli elementi mentre LIM è il numero
+!               massimo di mesh.
   use interfaccia
   use intero
   use mistura
@@ -81,7 +88,7 @@ program STELEV
   integer :: relax_step, max_relax_step = 50
 
   !Abilita la presenza di Dark Matter stile WIMP//FRANCESCO
-  integer :: on_off_DM=1
+  integer :: on_off_DM=1 ! Se on_off_DM=1 c'é la DM, se on_off_DM=0, non c'è la DM
   if(on_off_DM==1) then
       write(*,*)"MATERIA OSCURA: on"
   else if(on_off_DM==0) then
@@ -101,7 +108,7 @@ program STELEV
   
   ! apre i file di I/O e legge i valori dei parametri dinamici e mistura 
   call inout(IDIFF, div_pastem, max_pastem, URA, ULA, UPA, UTA, UMA, VMM, &
-       mix, kover, par_OVER, maxAGE)
+       mix, kover, par_OVER, maxAGE)! La subrutine si trova in io.f90
 
   nfine_diff = 0
   N_BH05 = 0
