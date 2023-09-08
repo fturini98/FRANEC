@@ -8,6 +8,12 @@ Clicca per tornare al [README](../README.md)
 
 - [Suggerimenti per il test del codice](#suggerimenti-per-il-test-del-codice)
 
+- [Struttura FRANEC (franec.f90)](Franec_standard/Franec_standard.md)
+
+    - [subroutines](Franec_standard/franec_subrutines/franec_indice_subrutines.md)
+
+    - [moduli](Franec_standard/moduli.md)
+
 - [Sezione relativa alla Dark Matter](Dark_Matter/Dark_Matter.md)
 
 ## Gestione della compilazione del codice

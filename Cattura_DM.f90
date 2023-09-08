@@ -21,19 +21,14 @@ subroutine Cattura_DM()
     implicit none
      
     integer :: k, counter=0
-  
-    !real,dimension(MELE,LIM) :: XXX
     
-    write(*,*)"Il limite è:",LIM
-    !write(*,*)"Piango"
-    !write(*,*)"Il massimo del raggio è:",G(1,LIM)
-    write(*,*)"Cambio 1" 
+   
+
     do k = 1, LIM
         if (G(1,k)>0) then
-            write(*,*)G(1,k)
             counter= counter +1
         endif
     end do
-    write(*,*)"Speriamo Funzioni, Il counter è:",counter
+    write(*,*)"Il counter è:",counter
       
   end subroutine Cattura_DM

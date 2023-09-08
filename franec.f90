@@ -333,7 +333,7 @@ program STELEV
      close(64)
   endif
 
-  ! INIZIO ITERAZIONI 
+  ! INIZIO ITERAZIONI !Ogni ciclo è un modello che avanza nel tempo
   mainloop: do
      if(primo == 1) then
         primo = 0
@@ -379,7 +379,7 @@ program STELEV
      call QUATM(NABLA1,INIZ,MAXME,MAXMV,EMTOV)
      call HENYEY(MAXME,MAXMV,ERROR,NUM0,IERR)
 
-     ! CONTROLLO CONVERGENZA
+     ! CONTROLLO CONVERGENZA ### QUESTA SEZIONE E' QUELLA CHE USA IL MAIN LOOP SENZA AVANZARE DI PASSO TEMPORALE.
      aggiusta = 0
      if(MAIS > 1) then
         if(abs(ERROR) < 1.d-3 .and. abs(DAM) < 1.d-3) aggiusta = 1
@@ -392,7 +392,7 @@ program STELEV
                 aggiusta = 1
         endif
      endif
-     if(aggiusta == 0) then
+     if(aggiusta == 0) then ! Entro qui solo se la struttura non converge, e quindi provo a modificare i parametri fichè non funziona
         ! AGGIUSTO  CORREZIONI
         FRAT = 1.0
         if(XXX(1,1) <= 0. .and. XXX(3,1) <= 0. .and. abs(DAM) > 1.d1) then
@@ -419,9 +419,9 @@ program STELEV
               stop
            endif
         end do
-        cycle
+        cycle ! cycle fa ripartire il loop dallo step successivo dopo che i parametri della stella sono stati cambiati perchè non convergeva
      endif
-19   continue
+19   continue !Solo se chiami goto 19 viene eseguita questa riga, altrimenti viene ignorata
 
 
      ! CONTROLLA SE RAGGIO E/O PRESSIONE PRESENTANO INVERSIONI
