@@ -124,7 +124,7 @@ program STELEV
 
   write(2,666)
   write(2,555)
-  LBA = 4
+  LBA = 4 ! Serve a dare la uinit ai read
   IBAT = 0
   MD = 12
   IPRALL = 0
@@ -135,10 +135,10 @@ program STELEV
   FRAT = 1.
   JUPIT = 1
   PROV = 0.
-
+!############## Leggo i Modstart.in
   ! IREAD:   1=MODANT   2=PRES   3=HOMOG   4=HB   5=WD
-  read(4,*) IREAD
-  read(4,*) NITER
+  read(4,*) IREAD !Tipo di avvio
+  read(4,*) NITER !Numero di step temporali massimo (corrisponde ai cicli completi del mainloop)
   read(4,*) NPER
   read(4,*) ISUB
   read(4,*) IQUAT
@@ -174,6 +174,9 @@ program STELEV
   ! KSF=1 USA IL REZONING DELL'ATMOSFERA
   ! KSG=N GRAFICA TEMPORALE OGNI N MODELLI
   ! KSH=M GRAFICA STRUTTURA OGNI M MODELLI
+  !#####################################
+  !Qua sto leggendo sempre i Modstart.in
+  !#####################################
   read(LBA,*) KSA
   read(LBA,*) KSB
   read(LBA,*) KSD
@@ -210,6 +213,10 @@ program STELEV
      do IP=1,MELE
         XX(IP) = XXX(IP,MAXME)
      end do
+   !#################################################################### 
+   ! Calcolo del mdodello 0 da cui parte l'evoluzione per la presequenza 
+   !####################################################################
+   ! IREAD==2 -> Tale valore indica la presequenza
   else if(IREAD == 2) then
      ! FITTING PRESEQUENZA 
      call INNES(ITCC,IPP,MAXME,ILEG,LBA, YB,ZB, He, Zeta, Alpha, do_relax)
@@ -258,6 +265,9 @@ program STELEV
      IPROI = 1
      MAXMV = MAXME
      EMTOV = EMTOT
+   !###########################################
+   ! Qua fa il caso per la main sequence e l'HB
+   !###########################################
   else if (IREAD == 3 .or. IREAD == 4) then
      !  FITTING MS ED HB 
      call INNES(ITCC,IPP,MAXME,ILEG,LBA, YB,ZB, He, Zeta, Alpha, do_relax)
@@ -332,15 +342,17 @@ program STELEV
      read(64,*) oldETA
      close(64)
   endif
-
-  ! INIZIO ITERAZIONI !Ogni ciclo è un modello che avanza nel tempo
+  !####################
+  ! INIZIO ITERAZIONI 
+  !####################
+  !Ogni ciclo è un modello che avanza nel tempo
   mainloop: do
      if(primo == 1) then
         primo = 0
         goto 19  ! al primo giro salta la parte iniziale
      endif
      
-     MAIS = MAIS+1
+     MAIS = MAIS+1 ! Contatore dei cicli per la convergenza della struttura
      INES = 0
      IPRALL = KSA
      ! massimo numero di iterazioni per arrivare a convergenza
@@ -349,6 +361,9 @@ program STELEV
      NUMAX = 100
      if(NMD < 40) NUMAX = 1000
 
+     !#######################################################
+     ! Sezione errore per troppe iterazioni senza convergenza
+     !#######################################################
      if(MAIS > NUMAX) then
         ! SE LE ITERAZIONI SONO TROPPE SI FERMA
         write(2,4444)
@@ -360,8 +375,11 @@ program STELEV
         write(66,*) 'Mesh atmosfera:',NUM2,'con errore',DAM
         stop
      endif
-     if(MAIS <= 1) then
-        call MIXING(MAXME,iread)
+     !################################################
+     !Mixa gli elementi nelle zone dove c'è convezione
+     !################################################
+     if(MAIS <= 1) then ! lo esegue solo al primo giro per ogni passo temporale
+        call MIXING(MAXME,iread) 
         
         if(XXX(1,1) > 1.d-5 .and. G(4,1) > 6.8 .and. STDCHIM == 1) then
            call EQLB(MAXME)
@@ -379,7 +397,8 @@ program STELEV
      call QUATM(NABLA1,INIZ,MAXME,MAXMV,EMTOV)
      call HENYEY(MAXME,MAXMV,ERROR,NUM0,IERR)
 
-     ! CONTROLLO CONVERGENZA ### QUESTA SEZIONE E' QUELLA CHE USA IL MAIN LOOP SENZA AVANZARE DI PASSO TEMPORALE.
+     ! CONTROLLO CONVERGENZA 
+     ! QUESTA SEZIONE E' QUELLA CHE USA IL MAIN LOOP SENZA AVANZARE DI PASSO TEMPORALE.
      aggiusta = 0
      if(MAIS > 1) then
         if(abs(ERROR) < 1.d-3 .and. abs(DAM) < 1.d-3) aggiusta = 1
@@ -423,6 +442,10 @@ program STELEV
      endif
 19   continue !Solo se chiami goto 19 viene eseguita questa riga, altrimenti viene ignorata
 
+
+   !##################################
+   ! Sezione comune per tutti i cicli
+   !##################################
 
      ! CONTROLLA SE RAGGIO E/O PRESSIONE PRESENTANO INVERSIONI
      KH1 = 0

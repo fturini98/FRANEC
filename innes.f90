@@ -59,7 +59,7 @@ subroutine INNES(ITCC,IPP,MAXMEin,ILEG,LBA, YB,ZB, He, Zeta, Alpha)
      EMAHE = 0. 
      letto = 1
      read(LBA,*,end=122) Y
-     read(LBA,*) XME
+     read(LBA,*) XME !Legge la metallicita dal modstart
      read(LBA,*) FARZ
      read(LBA,*) ALFA
      read(LBA,*) BMAG

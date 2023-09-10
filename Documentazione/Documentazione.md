@@ -10,7 +10,7 @@ Clicca per tornare al [README](../README.md)
 
 - [Struttura FRANEC (franec.f90)](Franec_standard/Franec_standard.md)
 
-    - [subroutines](Franec_standard/franec_subrutines/franec_indice_subrutines.md)
+    - [subroutines](Franec_standard/franec_subroutines/franec_indice_subroutines.md)
 
     - [moduli](Franec_standard/moduli.md)
 

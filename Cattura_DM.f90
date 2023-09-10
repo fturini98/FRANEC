@@ -25,10 +25,13 @@ subroutine Cattura_DM()
    
 
     do k = 1, LIM
-        if (G(1,k)>0) then
-            counter= counter +1
+        if (G(1,k)/=0) then 
+           write(*,*)G(1,k)
+           counter= counter +1
         endif
     end do
-    write(*,*)"Il counter è:",counter
+    write(*,*)"Il counter è e cambia2:",counter
+    write(*,*)G(1,1)
+    write(*,*)G(1,2)
       
   end subroutine Cattura_DM
