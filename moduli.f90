@@ -801,3 +801,33 @@ module interfaccia2
 
   end interface
 end module interfaccia2
+
+!########################################
+!Modulo per le variabili realtive alla DM
+!########################################
+module Dark_Matter
+  real :: rho_DM=0.3 !GeV/(c^2*cm^3)
+  real :: N_DM_tot=0 !Numero di particelle all'intermo della struttura per passo temporale
+  real :: mass_DM=10 !GeV/c^2 Massa della particella di DM
+  real,parameter :: GeV_grammi=1.783e-24 !Costante di conversione da GeV/c^2 a grammi
+
+  
+  !Scelgo le velocità media e la velocità di dispersione della stella rispetto al rest frame dell DM
+  !Questo serve per la funzione di cattura
+  real :: v_star=220d0 !km/s In questo caso scelgo la velocità del Sole
+  real :: v_disp=270d0 !Km/s Uso sempre il Sole
+end module Dark_Matter
+
+module FUNZIONI
+!Modulo per alcune funzioni matematiche necessarie per il calcolo della DM
+
+  !######
+  !ERF(x)
+  !######
+  interface
+  real function erf(x) bind(c, name="erf")
+    import
+    real, value :: x
+  end function erf
+  end interface
+end module FUNZIONI

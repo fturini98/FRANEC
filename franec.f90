@@ -515,6 +515,13 @@ program STELEV
         end if
      endif
 
+     !Chiamo la funzione per calcolarmi la cattura della materia oscura.//FRANCESCO
+     !Va chiamata dopo PASTEM o il passo temporale è per la vecchia struttura
+     if(on_off_DM==1)then
+      call Cattura_DM()
+      endif
+
+
      ! controllo se devo scrivere un modello per pepper (test_iread4 = 1)
      test_iread4 = 0
      if(iread == 4) then
@@ -707,11 +714,7 @@ program STELEV
         call ciacioLi(tempo,nmd,maxme,nsmorza, nsole, nfine_diff)
      endif
 
-     !Chiamo la funzione per calcolarmi la cattura della materia oscura.//FRANCESCO
-     if(on_off_DM==1)then
-      call Cattura_DM()
-      endif
-
+     
      if(iread /= 4) then
         ! metto la comp. al mesh maxme uguale a quella maxme-1
         XXX(1:mele, MAXME-1) = XXX(1:mele, MAXME-2)
