@@ -70,19 +70,19 @@ subroutine Cattura_DM()
    !Parte inutile di test
    !######################
     
-   write(*,*)"Counter:",counter,"Massa sup:",M_sup,"Raggio_sup:",R_sup, &
-   "Velocità di fuga:", v_esc,"HT1:",HT1,"HT1V",HT1v,"Xi:",xi_DM,"C_geom:",&
-   C_geom,"N chi totali fino a qui:",N_DM_tot
+   !write(*,*)"Counter:",counter,"Massa sup:",M_sup,"Raggio_sup:",R_sup, &
+   !"Velocità di fuga:", v_esc,"HT1:",HT1,"HT1V",HT1v,"Xi:",xi_DM,"C_geom:",&
+   !C_geom,"N chi totali fino a qui:",N_DM_tot
 
    !Controllo sole
-   R_sup=6.96
-   v_esc=sqrt(2*Ggrav*M_sup/R_sup*1e23)*1e-5
-   call xi_DM_sub(v_esc,xi_DM)
-   C_geom= pigre*(R_sup*1e10)**2*(rho_DM/mass_DM)*sqrt(8.0d0/(3.0d0*pigre))*&
-   (v_disp*1e5)*&!si converte solo questa velocità da km/s a cm/s perché 
+   !R_sup=6.96
+   !v_esc=sqrt(2*Ggrav*M_sup/R_sup*1e23)*1e-5
+   !call xi_DM_sub(v_esc,xi_DM)
+   !C_geom= pigre*(R_sup*1e10)**2*(rho_DM/mass_DM)*sqrt(8.0d0/(3.0d0*pigre))*&
+   !(v_disp*1e5)*&!si converte solo questa velocità da km/s a cm/s perché 
    !le altre unità di misura si semplificano tra di loro
-   (1+(3.d0/2.d0)*((v_esc/v_disp)**2))*xi_DM
-   write(*,*)"V fuga sole:",v_esc,"Xi soloe",xi_DM ,"10^5",1e5,"C_geom Sole",C_geom 
+   !(1+(3.d0/2.d0)*((v_esc/v_disp)**2))*xi_DM
+   !write(*,*)"V fuga sole:",v_esc,"Xi soloe",xi_DM ,"10^5",1e5,"C_geom Sole",C_geom 
 
 end subroutine Cattura_DM
 

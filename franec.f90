@@ -519,6 +519,7 @@ program STELEV
      !Va chiamata dopo PASTEM o il passo temporale è per la vecchia struttura
      if(on_off_DM==1)then
       call Cattura_DM()
+      call convergenza_epsi_DM()
       endif
 
 

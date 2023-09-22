@@ -806,9 +806,13 @@ end module interfaccia2
 !Modulo per le variabili realtive alla DM
 !########################################
 module Dark_Matter
+  use parametri !Serve per avere la variabile LIM
+
   real :: rho_DM=0.3 !GeV/(c^2*cm^3)
+  real :: sigma0_DM=1e-47 !Sezione d'urto per DM-idrogeno secondo upper limit Xenon-1ton 
   real :: N_DM_tot=0 !Numero di particelle all'intermo della struttura per passo temporale
   real :: mass_DM=10 !GeV/c^2 Massa della particella di DM
+  real,dimension(LIM) :: epsi_DM !Array per contenere l'epsi dovuta alla DM
   real,parameter :: GeV_grammi=1.783e-24 !Costante di conversione da GeV/c^2 a grammi
 
   
@@ -831,3 +835,28 @@ module FUNZIONI
   end function erf
   end interface
 end module FUNZIONI
+
+module Masse_ele
+  implicit none
+
+  !Definizione masse elementi, la metto in masse atomiche, la sequenza degli elementi la prendo da chim
+    !  1=XH,     2=XHE3,   3=XHE4,    4=XC12,   5=XN14,
+    !  6=XO16,   7=XO18,   8=XNE20,   9=XNE22, 10=XMG24,
+    ! 11=XMG25, 12=XMG26, 13=XSI28,  14=XNEU,  15=XNA23,
+    ! 16=XC13,  17=XN15,  18=XO17,   19=XF19,  20=XNE21,
+    ! 21=XFE,   22=XLI6,  23=XLI7,   24=XBE,   25=XB
+    ! 26=XD
+  real, parameter :: massa_ele(26) = &
+  [1.00784, 3.0160293, 4.002602, 12.0, 14.003074, 15.994914, 17.9991610, 19.992440, &
+   21.9913855, 23.98504170, 24.9858370, 25.9825930, 27.9769265, 1.0, 22.989770, 13.00335, &
+   15.000108899, 16.999131, 18.998403, 20.9938467, 55.845, 6.01512, 7.01600, 9.012182, &
+   10.81, 2.014]
+
+  ! Elenco dei vari elementi chimici
+  ! H, He3, He4, C12, N14, O16, O18, Ne20, Ne22, Mg24, Mg25, Mg26, 
+  ! Si28, Booooo 14, Na23, C 13, N15, O17, F19, Ne21, Fe,
+  ! Li6, Li7, Be, B, D
+
+  real,parameter :: u_to_gramms=1.66054e-24!Conversione Unità di massa a grammi
+  
+end module Masse_ele
