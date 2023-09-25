@@ -8,6 +8,8 @@ Clicca per tornare al [README](../README.md)
 
 - [Suggerimenti per il test del codice](#suggerimenti-per-il-test-del-codice)
 
+- [Cose da fare](#cose-da-fare)
+
 - [Struttura FRANEC (franec.f90)](Franec_standard/Franec_standard.md)
 
     - [subroutines](Franec_standard/franec_subroutines/franec_indice_subroutines.md)
@@ -38,8 +40,31 @@ In generale i problemi di compilazione sono dati da un errata scrittura del codi
 e poi ricompilando.
 
 ## Suggerimenti per il test del codice
-Per testare il codice, dopo la compilazione, basta posizionarsi nel main folder **FRANEC-net** e lanciare il programma tramite
+Per testare il codice, dopo la compilazione, si possono utilizzare 3 prinicpali metodi partendo dal main folder **FRANEC-net**:
+    
+- **./franec.sh**, legge il Modstart.in nel main folder e lancia i processi collegati alla shell, ciò permette di:
+    - leggere i *write* a schermo
+    - stoppare il programma con **stop**
 
-    ./lancia.sh
-Tale procedura permetterà di visualizzare i vari *write* sulla shell. La normale procedura se no scriverebbe gli output su dei file di log.
+- **./lancia.sh**, questo programma mi permette di lanciare i calcoli sempre collegando i processi alla shell, ma a differenza di *./franec.sh* non si ferma con *stop*. Questo succede perché lancia gestisce i vari problemi delle ripartenze.
+
+- **./Driver-run "n-processi-in parallelo" lancia.sh tools/driver/out**, Il metodo classico di lanciare il programma.
+    - Legge il file [**prove-pre-driver.dat**](./../../prove-per-driver.dat) dove ha la lista dei vari modstart da lanciare.
+    - Legge i modstart in [tools/driver/start](./../../tools/driver/start) elencati in pove-pre-driver e ne genera uno shedule per lanciarli in parallelo.
+        - in fase di test è sato modificato **M1.00_Z0.01760_He0.2734_ML1.90** ([vai a](./../../tools/driver/start/M1.00_Z0.01760_He0.2734_ML1.90))
+    - Lancia i vari *./lancia.sh* e registra i vari file di output nella cartella [*tools/driver/out*](./../../tools/driver/out) e quella lincata simbolicamente ad essa.
+
+    Il vantaggio di lanciare il prgramma così è che i processi non sono legati alla shell, quindi è possibile sologgare dalla macchina senza interrompere i processi.
+
+## Cose da fare
+- cambiare variabile *modello* con *NMD* in epsi_DM.f90
+- Sistemare convergenza
+- LIM com MAXME<---------Controllali
+- Commentare
+- Fare un print nel file->Subroutine
+- aggiungere epsi come con matteo
+- Guardare il fine mesh
+- Mass_DM.in rho_DM.in
+- Scrivere nel file run.log l'on_off_DM si fa tramite la subroutine in io.f90
+
 

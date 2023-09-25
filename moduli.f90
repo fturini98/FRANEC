@@ -805,8 +805,19 @@ end module interfaccia2
 !########################################
 !Modulo per le variabili realtive alla DM
 !########################################
+
 module Dark_Matter
+!Modulo per la gestione delle varie variabili relative alla DM
   use parametri !Serve per avere la variabile LIM
+
+
+  !###############################
+  !Per la subroutine di scrittura
+  !###############################
+  integer,parameter :: ioDark=411 !La uint per il file di log delle epsi della Dark matter
+  integer :: first_DM_write=1!Indice per la scrittura in ioDark 
+
+  integer,parameter :: ioDrakError=412 !La uniti per il file che mi salva i vari modelli in cui la T_DM non converge
 
   real :: rho_DM=0.3 !GeV/(c^2*cm^3)
   real :: sigma0_DM=1e-47 !Sezione d'urto per DM-idrogeno secondo upper limit Xenon-1ton 
@@ -837,6 +848,7 @@ module FUNZIONI
 end module FUNZIONI
 
 module Masse_ele
+!Modulo per avere a disposizione le varie masse degli elementi all'interno delle varie subroutine
   implicit none
 
   !Definizione masse elementi, la metto in masse atomiche, la sequenza degli elementi la prendo da chim
