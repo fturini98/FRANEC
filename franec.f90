@@ -95,11 +95,6 @@ program STELEV
       write(*,*)"MATERIA OSCURA: on"
       open(ioDark, file='DarkMatter.DAT', status='unknown', action='write')
       open(ioDrakError, file='DarkMatterERROR.DAT', status='unknown', action='write')!Apre il file dove salva le info solo quando la T_DM non converge
-      write(ioDrakError, '(A, A, A, A, A, A, A, A, A, A, A)')"#_Modello",char(9)//char(9),&
-         "Tempo_yr",char(9)//char(9)//char(9)//char(9),&
-         "T_DM-1e-6kel",char(9)//char(9)//char(9)//char(9),&
-         "Luminosità_DM",char(9)//char(9)//char(9)//char(9),&
-         "Lum_tot",char(9)//char(9)//char(9)//char(9),"L_DM/L_tot"
   else if(on_off_DM==0) then
       write(*,*)"MATERIA OSCURA: off"
   endif
@@ -528,14 +523,14 @@ program STELEV
      !Va chiamata dopo PASTEM o il passo temporale è per la vecchia struttura
      if(on_off_DM==1)then
       
-         if (Modello>2) then !In questo modo dopo che è stata calcolata al 3 ciclo la struttura, che ha un senso fisico
+         if (NMD>2) then !In questo modo dopo che è stata calcolata al 3 ciclo la struttura, che ha un senso fisico
             !si calcola quanta DM cattura, che infulenzerà la struttura dal 4 ciclo in poi.
             call Cattura_DM()
-            call convergenza_epsi_DM(epsi_DM_tot,T_DM,modello,Tempo)
+            call convergenza_epsi_DM(epsi_DM_tot,T_DM,NMD,Tempo)
          endif
 
          !Stampa dell'epsi calcolata
-         if ( Modello>3 ) then !A partire dal quarto giro si registra i dati dell'epsi 
+         if ( NMD>3 ) then !A partire dal quarto giro si registra i dati dell'epsi 
             !totale in quanto i primi 3 servono solo a fare la convergenza per la partenza
             ! e la epsi viene calcolata al ciclo successivo
             call stampa_epsi_DM(NMD,epsi_DM_tot,T_DM,Tempo)

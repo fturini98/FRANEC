@@ -57,14 +57,17 @@ Per testare il codice, dopo la compilazione, si possono utilizzare 3 prinicpali 
     Il vantaggio di lanciare il prgramma così è che i processi non sono legati alla shell, quindi è possibile sologgare dalla macchina senza interrompere i processi.
 
 ## Cose da fare
-- cambiare variabile *modello* con *NMD* in epsi_DM.f90
-- Sistemare convergenza
-- LIM com MAXME<---------Controllali
-- Commentare
-- Fare un print nel file->Subroutine
-- aggiungere epsi come con matteo
-- Guardare il fine mesh
-- Mass_DM.in rho_DM.in
-- Scrivere nel file run.log l'on_off_DM si fa tramite la subroutine in io.f90
+- **[]** Sistemare M_mesh e G che da problemi al bordo MAXME+1 è diverso
+- **[]** Sistemare il fatto i i+1 al bordo
+- **[X]** cambiare variabile *modello* con *NMD* in epsi_DM.f90
+- **[]** Sistemare convergenza
+- **[X]** LIM com MAXME<---------Controllali
+- **[]** Commentare
+- **[]** Passare N_DM a ogni ripartenza del lancia tramite modifica di lancia e/o driver
+- **[X]** Fare un print nel file->Subroutine
+- **[]** aggiungere epsi come con matteo
+- **[]** Guardare il fine mesh
+- **[]** Mass_DM.in rho_DM.in
+- **[]** Scrivere nel file run.log l'on_off_DM si fa tramite la subroutine in io.f90
 
 
