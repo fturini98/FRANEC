@@ -88,16 +88,10 @@ program STELEV
 
   integer :: relax_step, max_relax_step = 50
 
-  !Abilita la presenza di Dark Matter stile WIMP//FRANCESCO
-  integer :: on_off_DM=1 ! Se on_off_DM=1 c'é la DM, se on_off_DM=0, non c'è la DM
-  real :: epsi_DM_tot,T_DM !La luminosità totale della DM e la temperatura della DM
-  if(on_off_DM==1) then
-      write(*,*)"MATERIA OSCURA: on"
-      open(ioDark, file='DarkMatter.DAT', status='unknown', action='write')
-      open(ioDrakError, file='DarkMatterERROR.DAT', status='unknown', action='write')!Apre il file dove salva le info solo quando la T_DM non converge
-  else if(on_off_DM==0) then
-      write(*,*)"MATERIA OSCURA: off"
-  endif
+  !Variabili Dark Matter stile WIMP//FRANCESCO
+  integer :: on_off_DM ! Se on_off_DM=1 c'é la DM, se on_off_DM=0, non c'è la DM
+  real :: epsi_DM_tot,T_DM,LOGN_DM_tot !La luminosità totale della DM e la temperatura della DM
+  
 
 
   NABLA1 = -1
@@ -171,6 +165,11 @@ program STELEV
   MAIS = 0
   MAXME = 180
 
+  !Assegno le variabili a mano di massa, densità e sezione d'urto
+  mass_DM=10      ! Massa DM GeV/c^2
+  rho_DM=0.3     ! Denistà DM Gev/(c^2 cm^3)
+  sigma0_DM=1e-47   ! Sezione d'urto DM-idrogeno in cm^2
+
   ! KSA = IPRALL
   ! KSB=N PRINTA OGNI N MODELLI
   ! KSD=K SCRIVE OGNI K MESH
@@ -191,6 +190,14 @@ program STELEV
 
   if(IREAD == 1) then
      ! LETTURA Modstart PER RIPARTENZA
+     ! ###############################
+     !      Lettura N_DM_tot
+     !################################
+     read(LBA,*) LOGN_DM_tot!Leggo dal modstart della ripartenza il numero di particelle di DM presenti in quel modello
+     !Nel modstart viene scritto il log10(N_DM_tot)
+     N_DM_tot=10**(LOGN_DM_tot)
+     !################################
+
      read(LBA,*) MAXME
      read(LBA,*) MAXMV
      read(LBA,*) NMOD
@@ -346,6 +353,36 @@ program STELEV
      read(64,*) oldETA
      close(64)
   endif
+
+  !########################
+  !Abilitazione presenza DM
+  !########################
+
+  if(rho_DM>0)then!Se la densità di DM è >0 abilito la presenza della DM
+   on_off_DM=1
+  else
+   on_off_DM=0
+   endif
+
+  !L'Evoluzione della DM è implementata solo per partire da PS, perché
+  !non si sa quanta ne cattura a priori, quindi la deve leggere ogni volta
+  !che riparte da un MODSTART, ma quando parte da PS N_DM_tot=0
+  if(IREAD==2)then!Partenza da PS
+   N_DM_tot=0
+   endif
+
+  !########################################
+  !Apertura file di output relativi alla DM
+  !########################################
+   open(ioDark, file='DarkMatter.DAT', status='unknown', action='write')
+   open(ioDrakError, file='DarkMatterERROR.DAT', status='unknown', action='write')!Apre il file dove salva le info solo quando la T_DM non converge
+
+  if(on_off_DM==1) then
+      write(*,*)"MATERIA OSCURA: on"
+   else if(on_off_DM==0) then
+      write(*,*)"MATERIA OSCURA: off"
+   endif
+
   !####################
   ! INIZIO ITERAZIONI 
   !####################
@@ -620,6 +657,15 @@ program STELEV
         write(MD,*) KSF
         write(MD,*) KSG
         write(MD,*) KSH
+        !##########
+        !   DM
+        !##########
+        !Scrivo nel mod di ripartenza massa, densità,sez.d'urto,e N particelle nel
+        !modstart di ripartenza
+        write(MD,*) log10(N_DM_tot), "! log10(Num. di part. di DM nella struttura)"
+        !#############
+        !   fine DM
+        !#############
         write(MD,*) MAXME, "! MAXME"
         write(MD,*) MAXMV
         write(MD,*) IMOD, "! modello di partenza"

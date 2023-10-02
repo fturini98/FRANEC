@@ -51,19 +51,18 @@ Per testare il codice, dopo la compilazione, si possono utilizzare 3 prinicpali 
 - **./Driver-run "n-processi-in parallelo" lancia.sh tools/driver/out**, Il metodo classico di lanciare il programma.
     - Legge il file [**prove-pre-driver.dat**](./../../prove-per-driver.dat) dove ha la lista dei vari modstart da lanciare.
     - Legge i modstart in [tools/driver/start](./../../tools/driver/start) elencati in pove-pre-driver e ne genera uno shedule per lanciarli in parallelo.
-        - in fase di test è sato modificato **M1.00_Z0.01760_He0.2734_ML1.90** ([vai a](./../../tools/driver/start/M1.00_Z0.01760_He0.2734_ML1.90))
+        - in fase di test è sato modificato **M1.00_Z0.01760_He0.2734_ML1.90** ([vai a](./../../tools/driver/start/M1.00_Z0.01760_He0.2734_ML1.90)), questo file è stato linkato tramite link simbolico tra Modstart_Backup/M1.00_Z0.01760_He0.2734_ML1.90 e tools/driver/start/M1.00_Z0.01760_He0.2734_ML1.90
     - Lancia i vari *./lancia.sh* e registra i vari file di output nella cartella [*tools/driver/out*](./../../tools/driver/out) e quella lincata simbolicamente ad essa.
 
     Il vantaggio di lanciare il prgramma così è che i processi non sono legati alla shell, quindi è possibile sologgare dalla macchina senza interrompere i processi.
 
 ## Cose da fare
-- **[]** Sistemare M_mesh e G che da problemi al bordo MAXME+1 è diverso
-- **[]** Sistemare il fatto i i+1 al bordo
+- **[X]** Sistemare M_mesh e G che da problemi al bordo MAXME+1 è diverso
 - **[X]** cambiare variabile *modello* con *NMD* in epsi_DM.f90
 - **[]** Sistemare convergenza
 - **[X]** LIM com MAXME<---------Controllali
 - **[]** Commentare
-- **[]** Passare N_DM a ogni ripartenza del lancia tramite modifica di lancia e/o driver
+- **[X]** Passare N_DM a ogni ripartenza del lancia tramite modifica di Modstart ripartenza
 - **[X]** Fare un print nel file->Subroutine
 - **[]** aggiungere epsi come con matteo
 - **[]** Guardare il fine mesh

@@ -819,10 +819,10 @@ module Dark_Matter
 
   integer,parameter :: ioDrakError=412 !La uniti per il file che mi salva i vari modelli in cui la T_DM non converge
 
-  real :: rho_DM=0.3 !GeV/(c^2*cm^3)
-  real :: sigma0_DM=1e-47 !Sezione d'urto per DM-idrogeno secondo upper limit Xenon-1ton 
-  real :: N_DM_tot=0 !Numero di particelle all'intermo della struttura per passo temporale
-  real :: mass_DM=10 !GeV/c^2 Massa della particella di DM
+  real :: rho_DM !GeV/(c^2*cm^3)
+  real :: sigma0_DM !Sezione d'urto per DM-idrogeno secondo upper limit Xenon-1ton 
+  real :: N_DM_tot !Numero di particelle all'intermo della struttura per passo temporale
+  real :: mass_DM !GeV/c^2 Massa della particella di DM
   real,dimension(LIM) :: epsi_DM !Array per contenere l'epsi dovuta alla DM
   real,parameter :: GeV_grammi=1.783e-24 !Costante di conversione da GeV/c^2 a grammi
 
