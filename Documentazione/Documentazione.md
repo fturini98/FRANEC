@@ -42,7 +42,7 @@ e poi ricompilando.
 ## Suggerimenti per il test del codice
 Per testare il codice, dopo la compilazione, si possono utilizzare 3 prinicpali metodi partendo dal main folder **FRANEC-net**:
     
-- **./franec.sh**, legge il Modstart.in nel main folder e lancia i processi collegati alla shell, ciò permette di:
+- **./franec.sh**, legge il Modstart.in (*è stato creato un link simbolico tra il **Modstrat.in in DMsrc.90/Modstart_Backup** e quello nel main folder*) nel main folder e lancia i processi collegati alla shell, ciò permette di:
     - leggere i *write* a schermo
     - stoppare il programma con **stop**
 
@@ -64,9 +64,12 @@ Per testare il codice, dopo la compilazione, si possono utilizzare 3 prinicpali 
 - **[]** Commentare
 - **[X]** Passare N_DM a ogni ripartenza del lancia tramite modifica di Modstart ripartenza
 - **[X]** Fare un print nel file->Subroutine
+    - **[]** Cattura
+    - **[]** epsi
 - **[]** aggiungere epsi come con matteo
 - **[]** Guardare il fine mesh
 - **[]** Mass_DM.in rho_DM.in
 - **[]** Scrivere nel file run.log l'on_off_DM si fa tramite la subroutine in io.f90
+- **[]** Mettere apposto l'elemento NEU
 
 

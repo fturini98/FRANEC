@@ -330,7 +330,7 @@ subroutine convergenza_epsi_DM(epsi_DM_tot,T_DM,NMD,tempo)
 
 end subroutine convergenza_epsi_DM
 
-subroutine stampa_epsi_DM(NMD,epsi_DM_tot,T_DM,Tempo)
+subroutine stampa_epsi_DM(NMD,epsi_DM_tot,T_DM,Tempo,C_tot)
 !Questa subroutine serve a stamaprsi i vari valori dell'epsi totale relativa alla DM.
 !Il file relativo si chiama epsi_DM e la sua unit vale unit=ioDark==411(è definita all'interno del moduleo Dark_Matter)
     
@@ -342,6 +342,7 @@ subroutine stampa_epsi_DM(NMD,epsi_DM_tot,T_DM,Tempo)
 
     integer :: NMD
     real :: epsi_DM_tot,T_DM,Tempo,Rapporto_Lumi_DM !La luminosità totale della DM e la temperatura della DM
+    real :: C_tot !Rate di cattura nell'intervallo di tempo
 
     if (first_DM_write==1) then!Serve a segnare cosa sono le varie colonne
         write(ioDark, '(A, A, A, A, A, A, A, A, A, A, A, A, A)')"#_Modello",char(9)//char(9),&
@@ -350,11 +351,12 @@ subroutine stampa_epsi_DM(NMD,epsi_DM_tot,T_DM,Tempo)
                     "Luminosità_DM",char(9)//char(9)//char(9)//char(9),&
                     "Lum_tot",char(9)//char(9)//char(9)//char(9)//char(9),&
                     "L_DM/L_tot",char(9)//char(9)//char(9)//char(9)//char(9),&
-                    "Teff"
+                    "Teff",char(9)//char(9)//char(9)//char(9)//char(9),&
+                    "C_tot [HZ]"
         first_DM_write=0
     endif
     Rapporto_Lumi_DM=abs(epsi_DM_tot)*1e-32/&
                         (10.0**(ELLOG)*&
                         38.27)!Luminosità solare *10^-32 erg/s
-    write(ioDark,'(I0, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15)')NMD,char(9),Tempo,char(9),T_DM,char(9),epsi_DM_tot,char(9),10.0**(ELLOG)*38.27*1e32,char(9),Rapporto_Lumi_DM,char(9),10.0**TEFF
+    write(ioDark,'(I0, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15)')NMD,char(9),Tempo,char(9),T_DM,char(9),epsi_DM_tot,char(9),10.0**(ELLOG)*38.27*1e32,char(9),Rapporto_Lumi_DM,char(9),10.0**TEFF,char(9),C_tot
 end subroutine stampa_epsi_DM

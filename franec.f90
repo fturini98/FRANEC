@@ -91,6 +91,7 @@ program STELEV
   !Variabili Dark Matter stile WIMP//FRANCESCO
   integer :: on_off_DM ! Se on_off_DM=1 c'é la DM, se on_off_DM=0, non c'è la DM
   real :: epsi_DM_tot,T_DM,LOGN_DM_tot !La luminosità totale della DM e la temperatura della DM
+  real :: C_tot !Rate di cattura per il modello
   
 
 
@@ -168,7 +169,7 @@ program STELEV
   !Assegno le variabili a mano di massa, densità e sezione d'urto
   mass_DM=10      ! Massa DM GeV/c^2
   rho_DM=0.3     ! Denistà DM Gev/(c^2 cm^3)
-  sigma0_DM=1e-47   ! Sezione d'urto DM-idrogeno in cm^2
+  sigma0_DM=1e-40   ! Sezione d'urto DM-idrogeno in cm^2
 
   ! KSA = IPRALL
   ! KSB=N PRINTA OGNI N MODELLI
@@ -562,7 +563,8 @@ program STELEV
       
          if (NMD>2) then !In questo modo dopo che è stata calcolata al 3 ciclo la struttura, che ha un senso fisico
             !si calcola quanta DM cattura, che infulenzerà la struttura dal 4 ciclo in poi.
-            call Cattura_DM()
+            call Cattura_DM(C_tot)!Mi restituisce il rate di cattura nell'intervallo HT1,
+            !serve restituirlo solo per salvarlo nel file DarkMatter.DAT
             call convergenza_epsi_DM(epsi_DM_tot,T_DM,NMD,Tempo)
          endif
 
@@ -570,7 +572,7 @@ program STELEV
          if ( NMD>3 ) then !A partire dal quarto giro si registra i dati dell'epsi 
             !totale in quanto i primi 3 servono solo a fare la convergenza per la partenza
             ! e la epsi viene calcolata al ciclo successivo
-            call stampa_epsi_DM(NMD,epsi_DM_tot,T_DM,Tempo)
+            call stampa_epsi_DM(NMD,epsi_DM_tot,T_DM,Tempo,C_tot)
          end if
       endif
 

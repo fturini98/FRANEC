@@ -803,7 +803,7 @@ module interfaccia2
 end module interfaccia2
 
 !########################################
-!Modulo per le variabili realtive alla DM
+!Moduli per le variabili realtive alla DM
 !########################################
 
 module Dark_Matter
@@ -872,3 +872,40 @@ module Masse_ele
   real,parameter :: u_to_gramms=1.66054e-24!Conversione Unità di massa a grammi
   
 end module Masse_ele
+
+module Asplund_per_DM
+!Modulo per caricare i valori log10(X_ele/X_H*m_H/m_ele)+12 da asplund 2009
+
+!Viene usato in: Cattura_DM.f90 (sub: Cattura_DM)
+
+  implicit none
+
+  integer :: on_off_DM_Asplund=0!Flag per attivare o disattivare gli elementi più pesanti guardando le abbondanze da asplung
+
+  character(2), dimension(69) :: elementi_asplund=&
+    ['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', &
+    'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', &
+    'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', &
+    'Ga', 'Ge', 'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Ru', &
+    'Rh', 'Pd', 'Ag', 'In', 'Sn', 'Xe', 'Ba', 'La', 'Ce', 'Pr', &
+    'Nd', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb', &
+    'Lu', 'Hf', 'W', 'Os', 'Ir', 'Au', 'Tl', 'Pb', 'Th']
+
+    real,dimension(69):: dati_asplund_DM=& !log10(N_ele/N_H)+12
+    [12.00, 10.93, 1.05, 1.38, 2.70, 8.43, 7.83, 8.69, 4.56, 7.93, &
+    6.24, 7.60, 6.45, 7.51, 5.41, 7.12, 5.50, 6.40, 5.03, 6.34, &
+    3.15, 4.95, 3.93, 5.64, 5.43, 7.50, 4.99, 6.22, 4.19, 4.56, &
+    3.04, 3.65, 3.25, 2.52, 2.87, 2.21, 2.58, 1.46, 1.88, 1.75, &
+    0.91, 1.57, 0.94, 0.80, 2.04, 2.24, 2.18, 1.10, 1.58, 0.72, &
+    1.42, 0.96, 0.52, 1.07, 0.30, 1.10, 0.48, 0.92, 0.10, 0.84, &
+    0.10, 0.85, 0.85, 1.40, 1.38, 0.92, 0.90, 1.75, 0.02]
+
+    real,dimension(69) :: numeri_massa_asplund_DM=&! A degli elementi
+    [1, 4, 7, 9, 11, 12, 14, 16, 19, 20, &
+    23, 24, 27, 28, 31, 32, 35, 40, 39, 40, &
+    45, 48, 51, 52, 55, 56, 59, 58, 63, 64, &
+    69, 74, 84, 85, 88, 89, 94, 93, 98, 102, &
+    103, 106, 107, 115, 120, 131, 136, 139, 140, 141, &
+    142, 152, 157, 156, 159, 164, 165, 166, 169, 174, &
+    175, 180, 184, 190, 193, 197, 204, 207, 232]
+end module Asplund_per_DM

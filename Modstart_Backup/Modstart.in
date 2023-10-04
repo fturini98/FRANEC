@@ -1,0 +1,33 @@
+2 		! IREAD: tipo di avvio (1/2/3/4) = (MOD/PS/MS/HB)
+-11		! NITER: numero iterazioni
+20		! NPER
+0 		! ISUB
+0 		! IQUAT
+0 		! IHP
+0 		! IFAST
+0 		! IPUNCH
+0 		! IORA
+0 		! NESCI
+1 		! IDIFF: diffusione (0/1) = (no/si)  ** LETTO SE IREAD = 1 **
+0 		! KSA: IPRALL
+99		! KSB = N: PRINTA OGNI N MODELLI
+5 		! KSD = N: SCRIVE OGNI N MESH
+0 		! KSE: uso di optim (0/1) = (si/no)
+0 		! KSF: rezoning atmosfera (0/1) = (no/si)
+1 		! KSG = N: GRAFICA TEMPORALE OGNI N MODELLI
+99		! KSH = N: GRAFICA STRUTTURA OGNI M MODELLI
+2.5942479E-01	! Y: elio
+1.4836866E-02	! XME: metallicita'
+2.600e-02	! FARZ
+1.7254340E+00	! ALFA
+0.000e+00	! BMAG
+0.000e+00	! AMCO
+0.000e+00	! ETAFPR
+1.000e+04	! CCO
+1.0000		! EMMU: massa della stella in masse solari
+1.3697		! ELLOG
+3.6962		! TEFF
+13.0171		! ELLPC
+6.1423		! ELLTC
+100		! LAST
+1.0000		! CORZ
