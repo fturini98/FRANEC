@@ -38,6 +38,8 @@ Le basi da cui si è partiti per sviluppare il codice sono:
 
             - **epsi_Dark_Matter.o**, che fa a stessa cosa per il file relativo alla epsi della DM
 
+            - **ioDarkMatter.o**, he legge e interpreta il file ioDarkMatter.f90 e genera il file ioDarkMatter.o da usare nel programma.
+
     - **franec.f90**:
 
 - Sono stati modificati i programmi
@@ -45,7 +47,7 @@ Le basi da cui si è partiti per sviluppare il codice sono:
 
     - [**driver.c**](./../../Gestione_driver/driver.c)
 
-    per poter genereare dei file in output (*DarkMatter.DAT* e *DarMatterERROR.DAT*) dove registrare varie variabili tramite la subroutine [stampa_epsi_DM](Subroutine/epsi_Dark_Matter.md) (definita in [epsi_Dark_Matter.f90](./../../epsi_Dark_Matter.f90)). Per poter generare questi file di putput è stato necessario creare nelle cartelle tools/driver e tools/lancia i rispettivi link simbolici tramite:
+    per poter genereare dei file in output (*DarkMatter.DAT*, *DarMatterERROR.DAT*,*DarkMatterCattura.DAT*) dove registrare varie variabili tramite la subroutine [stampa_epsi_DM](Subroutine/epsi_Dark_Matter.md) (definita in [ioDarkMatter.f90](./../../ioDarkMatter.f90)) e altri comanndi nelle subroutini **Cattura_DM** e **epsi_DM_routine**(file di errore). Per poter generare questi file di putput è stato necessario creare nelle cartelle tools/driver e tools/lancia i rispettivi link simbolici tramite:
         
         ln -s ./../../DMsrc.90/Gestione_driver/driver.c driver.c
 
