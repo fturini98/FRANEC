@@ -816,8 +816,19 @@ module Dark_Matter
   !###############################
   integer,parameter :: ioDark=411 !La uint per il file di log delle epsi della Dark matter
   integer :: first_DM_write=1!Indice per la scrittura in ioDark 
+  integer :: ioDark_on_off !Per attivare la scrittura o meno del file di output DarkMatter.DAT
 
-  integer,parameter :: ioDrakError=412 !La uniti per il file che mi salva i vari modelli in cui la T_DM non converge
+  !####################
+  !Scrittura DarkError
+  !####################
+  integer,parameter :: ioDarkError=412 !La unit per il file che mi salva i vari modelli in cui la T_DM non converge
+  integer :: ioDarkError_on_off !Per abilitare la scrittura di tutta la struttura in caso di errore
+
+  !#####################
+  !Scrittura DarkCattura
+  !#####################
+  integer, parameter :: ioDarkCattura=413 !La unit per il file che mi salva i vari rate di cattura in funzione del tempo per le varie specie chimiche
+  integer :: ioDarkCattura_on_off !Per abilitare la scrittura del file di Cattura.
 
   real :: rho_DM !GeV/(c^2*cm^3)
   real :: sigma0_DM !Sezione d'urto per DM-idrogeno secondo upper limit Xenon-1ton 

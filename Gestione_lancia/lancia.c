@@ -58,7 +58,7 @@ main(int argc, char **argv)
 
   // copia di backup file di parametri e pulizia
   system("cp parametri.in parametri.in-bak; cp Modstart.in Modstart.in-bak");
-  system("rm BIGTAB.DAT_* OUT.DAT_* MOD1.DAT_* MOD2.DAT_*  DarkMAtter.DAT_* DarkMatterERROR.DAT_* >& /dev/null");
+  system("rm BIGTAB.DAT_* OUT.DAT_* MOD1.DAT_* MOD2.DAT_*  DarkMAtter.DAT_* DarkMatterERROR.DAT_* DarkMatterCattura.DAT_* >& /dev/null");
   system("rm PRINT.DAT_* GRAFI.DAT_* >& /dev/null");
 
   // apertura file di log per controllare i passi fatti in caso di errore
@@ -204,7 +204,7 @@ void make_modstart_pepper()
   // la copia non dovrebbe servire (viene fatta da Creamod-pepper) 
   // ma e' un sistema di sicurezza dato che ci sono comportamenti non 
   // ancora debuggati
-  system("mkdir -p safe; cp BIGTAB.DAT OUT.DAT GRAFI.DAT PRINT.DAT* FISICA.DAT CHIMICA.DAT CHIMICA_SUP.DAT mixcno.dat scenario.log run.log error.log fasievolutive.log safe DarkMatter.DAT DarkMatterERROR.DAT >& /dev/null; cp Modstart.in-bak Modstart.in-preflash");
+  system("mkdir -p safe; cp BIGTAB.DAT OUT.DAT GRAFI.DAT PRINT.DAT* FISICA.DAT CHIMICA.DAT CHIMICA_SUP.DAT mixcno.dat scenario.log run.log error.log fasievolutive.log safe DarkMatter.DAT DarkMatterERROR.DAT DarkMatterCattura.DAT >& /dev/null; cp Modstart.in-bak Modstart.in-preflash");
 
   if(fopen("run-by-driver","r") != NULL)
     // lanciato mediante driver
@@ -257,6 +257,8 @@ void salvamodello(int cnt)
   sprintf(com,"cp DarkMatter.DAT DarkMatter.DAT_%d",cnt);
   system(com);
   sprintf(com,"cp DarkMatterERROR.DAT DarkMatterERROR.DAT_%d",cnt);
+  system(com);
+  sprintf(com,"cp DarkMatterCattura.DAT DarkMatterCattura.DAT_%d",cnt);
   system(com);
 }
 
@@ -528,6 +530,27 @@ void unisci(int cnt, FILE *fz)
       system(comando);
     }
   
+  // unione degli DarkMatterCattura
+  unlink("tmpDarkMatterCattura.DAT");
+  for(i=0;i<cnt;i++)
+    {
+      if(i<cnt-1)
+	{
+	  if(i==0) 
+	    sprintf(comando,"head -%d DarkMatterCattura.DAT_%d >> tmpDarkMatterCattura.DAT",
+		    partenze_run[i+1]-partenze_run[i], i+1); 
+	  else
+	    sprintf(comando,
+		    "grep -v \"#\" DarkMatterCattura.DAT_%d | head -%d>> tmpDarkMatterCattura.DAT",
+		    i+1, partenze_run[i+1]-partenze_run[i]); 
+	}
+      else if(cnt>1)
+	sprintf(comando,"grep -v \"#\" DarkMatterCattura.DAT_%d >> tmpDarkMatterCattura.DAT", i+1);
+      else
+	sprintf(comando,"cp DarkMatterCattura.DAT_1 tmpDarkMAtterCattura.DAT");
+      system(comando);
+    }
+  
   // unione di run.log
   unlink("run.log");
   unlink("error.log");
@@ -546,7 +569,7 @@ void unisci(int cnt, FILE *fz)
       system(comando);
     }
 
-  system("mv tmpOUT.DAT OUT.DAT; mv tmpBIGTAB.DAT BIGTAB.DAT; mv tmpGRAFI.DAT GRAFI.DAT; mv tmpmixcno.dat mixcno.dat; mv tmpDarkMAtter.DAT DarkMatter.DAT;mv tmpDarkMAtterERROR.DAT DarkMatterERROR.DAT;");
+  system("mv tmpOUT.DAT OUT.DAT; mv tmpBIGTAB.DAT BIGTAB.DAT; mv tmpGRAFI.DAT GRAFI.DAT; mv tmpmixcno.dat mixcno.dat; mv tmpDarkMAtter.DAT DarkMatter.DAT;mv tmpDarkMAtterERROR.DAT DarkMatterERROR.DAT; mv tmpDarkMAtterCattura.DAT DarkMatterCattura.DAT;");
   system("mv tmpCS.DAT CHIMICA_SUP.DAT; mv tmpC.DAT CHIMICA.DAT; mv tmpF.DAT FISICA.DAT; mv tmpS.DAT SUBATM.DAT; mv tmpfasievolutive.log fasievolutive.log");
   system("mv tmpNC.DAT NUCL.DAT");
 }

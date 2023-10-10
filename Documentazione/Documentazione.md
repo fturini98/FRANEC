@@ -56,6 +56,9 @@ Per testare il codice, dopo la compilazione, si possono utilizzare 3 prinicpali 
 
     Il vantaggio di lanciare il prgramma così è che i processi non sono legati alla shell, quindi è possibile sologgare dalla macchina senza interrompere i processi.
 
+**Attenzione**:
+
+- Il programma legge i parametri iniziali da **parametri.in** nel main folder, questo però è linkato simbolicamente con il file in *DMsrc.90/File_aggiuntivi/parametri.in*, quindi va cambiato questo.
 ## Cose da fare
 - **[X]** Sistemare M_mesh e G che da problemi al bordo MAXME+1 è diverso
 - **[X]** cambiare variabile *modello* con *NMD* in epsi_DM.f90
@@ -70,6 +73,9 @@ Per testare il codice, dopo la compilazione, si possono utilizzare 3 prinicpali 
 - **[]** Guardare il fine mesh
 - **[]** Mass_DM.in rho_DM.in
 - **[]** Scrivere nel file run.log l'on_off_DM si fa tramite la subroutine in io.f90
-- **[]** Mettere apposto l'elemento NEU
+- **[]** Mettere apposto l'elemento NEU (massa?)
+- **[X]** Fare il file out di cattura
+- **[X]** Sistemare il file Dark_Matter.DAT
+- **[X]** Sistemare il rapporto epsi_DM/epsi_tot, deve venire uguale su i due file
 
 

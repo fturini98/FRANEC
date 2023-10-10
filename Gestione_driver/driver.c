@@ -209,12 +209,12 @@ main(int argc, char **argv)
 	  // copia degli out della simulazione nella cartella creata
 	  if(pathout[0] != '/')
 	    {
-	      sprintf(com, "cd out/%s; cp BIGTAB.DAT OUT.DAT GRAFI.DAT.bz2  CHIMICA.DAT.bz2 FISICA.DAT.bz2 error.log lancia.log run.log Modstart.in-* scenario.log mixcno.dat abbondanze.in abbondanze-HB.in* scansioneHB.in flash.log fasievolutive.log parametri.in perturbazioni.in lastmass DarkMatter.DAT DarkMatterERROR.DAT ../../tools/driver/out/%s >& /dev/null", 
+	      sprintf(com, "cd out/%s; cp BIGTAB.DAT OUT.DAT GRAFI.DAT.bz2  CHIMICA.DAT.bz2 FISICA.DAT.bz2 error.log lancia.log run.log Modstart.in-* scenario.log mixcno.dat abbondanze.in abbondanze-HB.in* scansioneHB.in flash.log fasievolutive.log parametri.in perturbazioni.in lastmass DarkMatter.DAT DarkMatterERROR.DAT DarkMatterCattura.DAT ../../tools/driver/out/%s >& /dev/null", 
 		      prova[j], nomeout); 
 	    }
 	  else
 	    {
-	      sprintf(com, "cd out/%s; cp BIGTAB.DAT OUT.DAT GRAFI.DAT.bz2  CHIMICA.DAT.bz2 FISICA.DAT.bz2 error.log lancia.log run.log Modstart.in-* scenario.log mixcno.dat abbondanze.in abbondanze-HB.in* scansioneHB.in flash.log fasievolutive.log parametri.in perturbazioni.in lastmass DarkMatter.DAT DarkMatterERROR.DAT %s/%s >& /dev/null", 
+	      sprintf(com, "cd out/%s; cp BIGTAB.DAT OUT.DAT GRAFI.DAT.bz2  CHIMICA.DAT.bz2 FISICA.DAT.bz2 error.log lancia.log run.log Modstart.in-* scenario.log mixcno.dat abbondanze.in abbondanze-HB.in* scansioneHB.in flash.log fasievolutive.log parametri.in perturbazioni.in lastmass DarkMatter.DAT DarkMatterERROR.DAT DarkMatterCattura.DAT %s/%s >& /dev/null", 
 		      prova[j], pathout, nomeout); 
 	  
 	    }
@@ -228,7 +228,7 @@ main(int argc, char **argv)
 	      sprintf(com,"rm -f %s/%s/*", pathout, nomeout2);
 	      system(com);
 	      
-	      sprintf(com,"cd %s/%s; mv BIGTAB.DAT OUT.DAT GRAFI.DAT.bz2 CHIMICA.DAT.bz2 FISICA.DAT.bz2 run.log error.log lancia.log Modstart.in-bak lastmass DarkMatter.DAT DarkMatterERROR.DAT ../%s", 
+	      sprintf(com,"cd %s/%s; mv BIGTAB.DAT OUT.DAT GRAFI.DAT.bz2 CHIMICA.DAT.bz2 FISICA.DAT.bz2 run.log error.log lancia.log Modstart.in-bak lastmass DarkMatter.DAT DarkMatterERROR.DAT DarkMatterCattura.DAT ../%s", 
 		      pathout, nomeout, nomeout2);
 	      system(com);
 	      sprintf(com,"rm -rf %s/%s", pathout, nomeout);

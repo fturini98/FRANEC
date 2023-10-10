@@ -166,10 +166,18 @@ program STELEV
   MAIS = 0
   MAXME = 180
 
-  !Assegno le variabili a mano di massa, densità e sezione d'urto
+  !########################################################################################################################
+  !Assegno le variabili a mano di massa, densità e sezione d'urto, e abilito i file di scrittura o meno per salvare spazio
+  !#######################################################################################################################
   mass_DM=10      ! Massa DM GeV/c^2
   rho_DM=0.3     ! Denistà DM Gev/(c^2 cm^3)
   sigma0_DM=1e-40   ! Sezione d'urto DM-idrogeno in cm^2
+
+  !Abilitazione scrittura file di output relativi alla DM
+  ioDark_on_off=0 !Abilita la scirttura di DarkMatter.DAT
+  ioDarkCattura_on_off=0 !Abilita la scrittura di DarkMatterCattura.DAT
+  ioDarkError_on_off=0 !Abilita la scrittura della struttura in caso di errore
+  !Se disattivato comunque scrive alcune info sui modelli problematici
 
   ! KSA = IPRALL
   ! KSB=N PRINTA OGNI N MODELLI
@@ -376,12 +384,24 @@ program STELEV
   !Apertura file di output relativi alla DM
   !########################################
    open(ioDark, file='DarkMatter.DAT', status='unknown', action='write')
-   open(ioDrakError, file='DarkMatterERROR.DAT', status='unknown', action='write')!Apre il file dove salva le info solo quando la T_DM non converge
-
+   if ( ioDark_on_off/=1 .and. on_off_DM==1 ) then
+      write(ioDark,*)"LA SCRITTURA DEL FILE DarkMatter.DAT E' DISABILITATA!"
+      write(ioDark,*)"Per abilitarla imposatre ioDark_on_off=1"
+   end if
+   open(ioDarkError, file='DarkMatterERROR.DAT', status='unknown', action='write')!Apre il file dove salva le info solo quando la T_DM non converge
+   if ( ioDarkError_on_off/=1 .and. on_off_DM==1) then
+      write(ioDarkError,*)"E' DISABILITATA LA SCRITTURA DI TUTTA LA STRUTTURA NEL CASO DI ERRORE!"
+      write(ioDarkError,*)"per abilitarla impostare ioDarkError_on_off==1"
+      write(ioDarkError,'(A)')"SE OLTRE A QUESTO MESSAGGIO NON E' PRESENTE NIENT'ALTRO VUOL DIRE CHE NON CI SONO ERRORI RELATIVI ALLA DM"
+   end if
+   open(ioDarkCattura, file='DarkMatterCattura.DAT', status='unknown', action='write')!Apre il file dove salva i vari rate di cattura
   if(on_off_DM==1) then
       write(*,*)"MATERIA OSCURA: on"
    else if(on_off_DM==0) then
       write(*,*)"MATERIA OSCURA: off"
+      write(ioDark,'(A,ES25.15,A)')"Materia oscura disattivata! Denista DM:",rho_DM,"[GeV/(c^2cm^3)]"
+      write(ioDarkError,'(A,ES25.15,A)')"Materia oscura disattivata! Denista DM:",rho_DM,"[GeV/(c^2cm^3)]"
+      write(ioDarkCattura,'(A,ES25.15,A)')"Materia oscura disattivata! Denista DM:",rho_DM,"[GeV/(c^2cm^3)]"
    endif
 
   !####################
@@ -563,7 +583,7 @@ program STELEV
       
          if (NMD>2) then !In questo modo dopo che è stata calcolata al 3 ciclo la struttura, che ha un senso fisico
             !si calcola quanta DM cattura, che infulenzerà la struttura dal 4 ciclo in poi.
-            call Cattura_DM(C_tot)!Mi restituisce il rate di cattura nell'intervallo HT1,
+            call Cattura_DM(NMD,Tempo,C_tot)!Mi restituisce il rate di cattura nell'intervallo HT1,
             !serve restituirlo solo per salvarlo nel file DarkMatter.DAT
             call convergenza_epsi_DM(epsi_DM_tot,T_DM,NMD,Tempo)
          endif
@@ -572,7 +592,9 @@ program STELEV
          if ( NMD>3 ) then !A partire dal quarto giro si registra i dati dell'epsi 
             !totale in quanto i primi 3 servono solo a fare la convergenza per la partenza
             ! e la epsi viene calcolata al ciclo successivo
-            call stampa_epsi_DM(NMD,epsi_DM_tot,T_DM,Tempo,C_tot)
+            if(ioDark_on_off==1)then!Abilito o meno la scrittura del file DarkMatter.DAT in base alle necesità di spazio sul disco
+               call stampa_epsi_DM(NMD,epsi_DM_tot,T_DM,Tempo,C_tot)!Mi salvo varie variabile relative all'epsi_DM nel file DarkMatter.DAT
+            end if
          end if
       endif
 
@@ -803,11 +825,11 @@ program STELEV
      MAIS = 0
   end do mainloop
 
-
-  if ( on_off_DM==1 ) then
+  !Chiusura file relativi alla DM
    close(ioDark)!Chiudo il file di output per la DarkMatter
-   close(ioDrakError)
-  end if
+   close(ioDarkError)
+   close(ioDarkCattura)
+
 
   !  ESCE 
   if(IBAT == 0) write(*,9999)

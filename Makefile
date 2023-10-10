@@ -23,7 +23,7 @@ PARALLEL =
 
 
 
-OBJ = moduli.o Cattura_DM.o epsi_Dark_Matter.o mylapack.o mylapack2.o myblas.o  dvode_f90_m.o\
+OBJ = moduli.o ioDarkMatter.o Cattura_DM.o epsi_Dark_Matter.o mylapack.o mylapack2.o myblas.o  dvode_f90_m.o\
 	atm_bh05.o atm_ck03.o atmos.o carbon.o  \
 	condint2006.o cross.o cub.o elio.o epsi.o epsig.o\
 	idreli.o idro.o \

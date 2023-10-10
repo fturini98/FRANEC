@@ -1,5 +1,5 @@
 2 		! IREAD: tipo di avvio (1/2/3/4) = (MOD/PS/MS/HB)
--50   ! NITER: numero iterazioni
+-90   ! NITER: numero iterazioni
 20 		! NPER
 0 		! ISUB
 0 		! IQUAT
