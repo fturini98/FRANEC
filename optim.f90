@@ -1,5 +1,5 @@
   !    QUESTA SUBROUTINE SERVE PER ALTERARE IL NUMERO DEI MESH            
-subroutine OPTIM(MAXME,SCALA,PROVV,ECNO, URA,ULA,UPA,UTA,UMA,VMM, fase) 
+subroutine OPTIM(MAXME,SCALA,PROVV,ECNO, URA,ULA,UPA,UTA,UMA,VMM, fase,T_DM) 
   use interfaccia
   use fisica
   use intero
@@ -9,6 +9,7 @@ subroutine OPTIM(MAXME,SCALA,PROVV,ECNO, URA,ULA,UPA,UTA,UMA,VMM, fase)
   use chimic
   use chim
   use numer
+  use Dark_Matter
 
   implicit none
 
@@ -29,7 +30,18 @@ subroutine OPTIM(MAXME,SCALA,PROVV,ECNO, URA,ULA,UPA,UTA,UMA,VMM, fase)
   integer, parameter :: Nini = 8
   real, dimension(LIM) :: XHe3_tmp
   integer :: iskip_he3 = 1 !! 0/1 = uso/non-uso He3 nella OPTIM 
-  
+
+  !##################################
+  !Variabili infittimento mesh per DM
+  !##################################
+  real :: Lumi_DM,&!Luminosità totale DM
+         T_DM,&!Temperatura della dark matter
+         Lumi_mesh,&!Luminosità mesh per DM
+         Lumi_mesh_prec,&!Luminosità del mesh precedente
+         Lumi_mesh_sommati!Luminosità dei mesh sommati(serve per sfittimento)
+   
+   integer :: infittisci_per_DM !Falg per decidere se infittire il mesh a causa della DM
+
   !! Ema & Matt: Massimo He3
   XHe3_max = maxval( XXX(2,1:MAXME-1) )
   XHe3_min = 5.d-2 * XHe3_max
@@ -59,7 +71,32 @@ subroutine OPTIM(MAXME,SCALA,PROVV,ECNO, URA,ULA,UPA,UTA,UMA,VMM, fase)
   ! INIZIA PARTE INFITTIMENTO 
   N = Nini
   do while(MAXME <= LIM-5 .and. N < MAXME)
-     N = N+1 
+     N = N+1
+      
+      if (on_off_fine_mesh_DM==1 .and. N>Nini+N_mesh_aggiunti_DM) then!Conviene partire da 3 mesh più in la per l'infittimento se no infittisce troppo
+         !al centro e quseto fa impazzire la ciacio
+         Lumi_mesh_prec=(epsi_DM(N-1)*(G(5,N)-G(5,N-1))*1e33)!La luminosità della DM nel mesh precedente al mesh N(Si usa il mesh precedente 
+         !perche l'intervallo in massa è tra N-1 e N)
+
+         !Se nel mesh il contributo della DM alla luminsoità positiva/negativa è maggiore di una frazione definita
+         !rispetta a quella totale positiva/negativa devo infittire il mesh
+         if ( Lumi_mesh_prec>=0 ) then
+            if ( Lumi_mesh_prec>Lumi_DM_positiva/N_min_mesh_DM ) then 
+               infittisci_per_DM=1
+            else
+               infittisci_per_DM=0
+            end if
+         else
+            if (abs(Lumi_mesh_prec)>abs(Lumi_DM_negativa)/N_min_mesh_DM) then
+               infittisci_per_DM=1
+            else
+               infittisci_per_DM=0
+            endif
+         end if
+
+      else
+         infittisci_per_DM=0
+      endif
 
      ! ricerca intervallo di VMM da utilizzare
      GIG = G(5,N)/EMTOT 
@@ -97,7 +134,7 @@ subroutine OPTIM(MAXME,SCALA,PROVV,ECNO, URA,ULA,UPA,UTA,UMA,VMM, fase)
 
      ! controllo se almeno un vincolo non e' soddisfatto
      if(P1 >= UR .or. P2 >= UL .or. P3 >= UP .or. P4 >= UT .or. P5 >= UM .or. &
-          PHe3 >= UHe3) then
+          PHe3 >= UHe3 .or. infittisci_per_DM==1) then
 
         !!if(PHe3 > UHe3) then
         !!   write(*,*)'infittimento He3:', MAXME
@@ -140,7 +177,9 @@ subroutine OPTIM(MAXME,SCALA,PROVV,ECNO, URA,ULA,UPA,UTA,UMA,VMM, fase)
         IN(N) = 0 
         XSERV(1,N) = XID 
         XSERV(2,N) = XEL 
-        MAXME = MAXME+1 
+        MAXME = MAXME+1
+        
+        call epsi_DM_routine(T_DM,Lumi_DM)!Calcolo nuovamente l'array dell'epsi_DM per la nuova struttura coi mesh infittiti
      endif
   end do
   ! FINE FASE INFITTIMENTO MESHPOINTS
@@ -148,9 +187,40 @@ subroutine OPTIM(MAXME,SCALA,PROVV,ECNO, URA,ULA,UPA,UTA,UMA,VMM, fase)
   ! INIZIA FASE SFOLTIMENTO MESHPOINTS 
   N = Nini + 2
   do while(N < MAXME-1)
-     N = N+1 
+     N = N+1
+     
+      if (on_off_fine_mesh_DM==1 .and. N>Nini+N_mesh_aggiunti_DM) then!Conviene partire da 3 mesh più in la per l'infittimento se no infittisce troppo
+         !al centro e quseto fa impazzire la ciacio
 
-     ! ricerca intervallo di VMM da utilizzare
+         Lumi_mesh=(epsi_DM(N)*(G(5,N+1)-G(5,N))*1e33)
+
+         Lumi_mesh_prec=(epsi_DM(N-1)*(G(5,N)-G(5,N-1))*1e33)!La luminosità della DM nel mesh precedente al mesh N(Si usa il mesh precedente 
+         !perche l'intervallo in massa è tra N-1 e N)
+
+         !Se nel mesh il contributo della DM alla luminsoità positiva/negativa è maggiore di una frazione definita
+         !rispetta a quella totale positiva/negativa devo infittire il mesh. Se al passo N esimo la somma della luminosità nel mesh tra N-1 N ed il mesh
+         !N N+1 é maggiore del mio valore massimo di luminosità per singolo mesh non devo sfittire
+     
+         Lumi_mesh_sommati=Lumi_mesh+Lumi_mesh_prec
+
+         if ( Lumi_mesh_sommati>=0 ) then
+            if ( Lumi_mesh_sommati>Lumi_DM_positiva/N_min_mesh_DM ) then 
+               infittisci_per_DM=1
+            else
+               infittisci_per_DM=0
+            end if
+         else
+            if (abs(Lumi_mesh_sommati)>abs(Lumi_DM_negativa)/N_min_mesh_DM) then
+               infittisci_per_DM=1
+            else
+               infittisci_per_DM=0
+            endif
+         end if
+      else
+         infittisci_per_DM=0
+      endif
+      
+      ! ricerca intervallo di VMM da utilizzare
      GIG = G(5,N)/EMTOT 
      do I=1,4 
         if(GIG >= VMM(I) .and. GIG < VMM(I+1)) exit
@@ -187,7 +257,7 @@ subroutine OPTIM(MAXME,SCALA,PROVV,ECNO, URA,ULA,UPA,UTA,UMA,VMM, fase)
      WXH = abs(XXX(1,N-1)-XXX(1,N+1)) 
      WH4 = abs(XXX(3,N-1)-XXX(3,N+1)) 
      if(P1 > UR .or. P2 > UL .or. P3 > UP .or. P4 > UT .or. P5 > UM .or. &
-          & PHe3 > UHe3) cycle
+          & PHe3 > UHe3 .or. infittisci_per_DM==1 ) cycle
      
      if( WXH > UXH .or. WH4 > UH4 ) cycle
      do J = 1,MELE 
@@ -216,7 +286,8 @@ subroutine OPTIM(MAXME,SCALA,PROVV,ECNO, URA,ULA,UPA,UTA,UMA,VMM, fase)
         XSERV(1,K-1) = XSERV(1,K) 
         XSERV(2,K-1) = XSERV(2,K) 
      end do
-     MAXME = MAXME-1 
+     MAXME = MAXME-1
+     call epsi_DM_routine(T_DM,Lumi_DM)!Calcolo nuovamente l'array dell'epsi_DM per la nuova struttura coi mesh sfittiti 
   end do
   ! FINE FASE SFOLTIMENTO 
 

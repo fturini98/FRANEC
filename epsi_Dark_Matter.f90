@@ -1,6 +1,6 @@
-subroutine epsi_DM_routine(T_DM,epsi_DM_tot)
+subroutine epsi_DM_routine(T_DM,Lumi_DM)
 !Subroutine che si calcola la epsi DM in maniera vettoriale (slavandola nella variabile globale data dal modulo) 
-!e restituisce epsi_DM_tot
+!e restituisce Lumi_DM
     use Dark_Matter!Modulo per le variabili relative alla DM
 
     use Masse_ele!Modulo per le masse degli elementi (massa_ele, u_to_gramms)
@@ -34,7 +34,8 @@ subroutine epsi_DM_routine(T_DM,epsi_DM_tot)
             sigma_ele,& !Sezione d'urto per elemento
             norm_DM_distr !Costante di normalizzazione della distribuzione di densità
 
-    real :: epsi_DM_tot !Integrale sull'epsi
+    real :: Lumi_DM,& !Integrale sull'epsi(Luminosità DM)
+            Lumi_mesh !La luminosità del mesh
 
     !##########################
     !Inizializzazione variabili
@@ -92,8 +93,10 @@ subroutine epsi_DM_routine(T_DM,epsi_DM_tot)
     !Calcolo epsi con loop su elementi
     !#################################
 
-    epsi_DM_tot=0!Inizializzo la funzione cumulartiva della epsi a 0
-
+    Lumi_DM=0!Inizializzo la funzione cumulartiva della epsi a 0
+    Lumi_DM_positiva=0!Inizializo la funzione cumulativa della Luminosità positiva a 0
+    Lumi_DM_negativa=0!Inizializo la funzione cumulativa della Luminosità negativa a 0
+    
     do i = 1, MAXME!Loop sui mesh
         epsi_DM(i)=0 !Lo setto a zero per poi sommarci su ad ogni elemento
         do ele = 1, MELE !Loop su tutti gli elementi
@@ -113,9 +116,17 @@ subroutine epsi_DM_routine(T_DM,epsi_DM_tot)
         !Mi calcolo anche l'integrale su epsi
         if ( epsi_DM(i)/=0 .or. i==MAXME) then !Questa condizione dovrebbe accellerare il calcolo e in più mi garantisce di evitare il problema del mesh i=LIM in cui R(i+1) non è
             !definito. Infatti epsi_DM(LIM)=0 per definizione in quanto le abbondanze in LIM sono 0 e epsi dipende da loro in maniera lineare.
-            epsi_DM_tot=epsi_DM_tot+(epsi_DM(i)*(M_mesh(i+1)-M_mesh(i))*1e33)!Mi calcolo la lumi totale tramite integrazione in massa
-            !epsi_DM_tot=epsi_DM_tot+(epsi_DM(i)*(G(5,i+1)-G(5,i))*1e33)
+            Lumi_mesh=(epsi_DM(i)*(M_mesh(i+1)-M_mesh(i))*1e33)!La luminosità della DM nel mesh
+            Lumi_DM=Lumi_DM+Lumi_mesh!Mi calcolo la lumi totale tramite integrazione in massa
+            
+            if ( Lumi_mesh>=0 ) then!Ogni volta che la luminosità è positiva/negativa la addizziono alla funzione cumulativa corrispondente
+                Lumi_DM_positiva=Lumi_DM_positiva+Lumi_mesh
+            else
+                Lumi_DM_negativa=Lumi_DM_negativa+Lumi_mesh
+            end if
 
+
+            
             !Errore a schermo per quando il delta m al maxme è minore di 0
             if((M_mesh(i+1)-M_mesh(i))<0 .and. i/=MAXME )then 
                 write(*,*)"Delta m minore di 0, mesh "
@@ -127,13 +138,14 @@ subroutine epsi_DM_routine(T_DM,epsi_DM_tot)
                 end do
                 stop
             endif
+
         end if
     end do
 
 end subroutine epsi_DM_routine
 
 
-subroutine convergenza_epsi_DM(epsi_DM_tot,T_DM,NMD,tempo)
+subroutine convergenza_epsi_DM(Lumi_DM,T_DM,NMD,tempo)
     
     use Dark_Matter!Carica le variabili della DM
 
@@ -159,10 +171,10 @@ subroutine convergenza_epsi_DM(epsi_DM_tot,T_DM,NMD,tempo)
                 max_cicli=21,&!Numero massimo di cicli per la convergenza della T_DM.(Con venti ho una precisone di circa 1e-6 in T_DM)
                 NMD !Servwe per quando ho l'errore di convergenza per stamaprimi il modello in DarkMatterERROR.DAT
                 
-    real :: epsi_DM_tot,& !Epsi cumulativa totale secondo la formula di Spergel and Press(Luminosità DM)
+    real :: Lumi_DM,& !Epsi cumulativa totale secondo la formula di Spergel and Press(Luminosità DM)
             T_DM,& !Temperatura della Dark Matter
-            epsi_DM_tot_vecchia,&!Variabile di supporto per salvarmi l'epsi tot durante la convergenza
-            errore_max=1e-4,& !Il valore limite per cui si ritiene che l'errore che si commette è trascurabile(Rapporto tra epsi e epsi tot)
+            Lumi_DM_vecchia,&!Variabile di supporto per salvarmi la luminosità della DM durante la convergenza
+            errore_max=1e-3,& !Il valore limite per cui si ritiene che l'errore che si commette è trascurabile(Rapporto tra epsi e epsi tot)
             Rapporto_Lumi_DM,&
             Tempo,&
             epsi_tot_min
@@ -206,32 +218,32 @@ subroutine convergenza_epsi_DM(epsi_DM_tot,T_DM,NMD,tempo)
     !##############################
     
     !Mi calcolo la epsi_DM mesh per mesh a partire T_DM e mi calcolo il suo integrale sulla struttura
-    call epsi_DM_routine(T_min,epsi_DM_tot)
-    epsi_tot_min=epsi_DM_tot
+    call epsi_DM_routine(T_min,Lumi_DM)
+    epsi_tot_min=Lumi_DM
     do i=1,MAXME
         epsi_DM_min(i)=epsi_DM(i)!Mi salvo l'array per l'epsi DM per la temperatura minima
         !Questo mi serve in caso di errore
     end do
-    call epsi_DM_routine(T_DM,epsi_DM_tot)
+    call epsi_DM_routine(T_DM,Lumi_DM)
     estremo=1
     
     
     !##############################
     !#      ERRORE GRAVE          #
     !##############################
-    if ((epsi_tot_min*epsi_DM_tot)>=0) then !Se la luminosità totale della DM per il massimo e il minimo delle Temperature hanno lo stesso
+    if ((epsi_tot_min*Lumi_DM)>=0) then !Se la luminosità totale della DM per il massimo e il minimo delle Temperature hanno lo stesso
         !segno non è garantito lo zero, ma ciò non è possibile, vuol dire che c'è un errore, qunidi lo scrivo nel file DarkMatterError.DAT
         write(ioDarkError,*)"#####################################################"
         write(ioDarkError,*)"#           ATTENZIONE al seguente modello          #"
         write(ioDarkError,*)"#####################################################"
         !Mi salvo numero modello e età del modello che mi da errore
-        write(ioDarkError,'(I0, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15)')NMD,char(9),Tempo,char(9),T_DM,char(9),epsi_DM_tot,char(9),&
+        write(ioDarkError,'(I0, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15)')NMD,char(9),Tempo,char(9),T_DM,char(9),Lumi_DM,char(9),&
         10.00**(ELLOG)*38.27*1e32,char(9),Rapporto_Lumi_DM
         write(ioDarkError,*)"#####################################################"
         write(ioDarkError,*)"# Estremi con lo stesso segno, lo 0 non è garantito #"
         write(ioDarkError,*)"#####################################################"
        !Mi salvo le info per il modello che mi da errore
-        write(ioDarkError,*)"L'epsi max è", epsi_DM_tot,"con una T_max di:",T_max,"l'epsi min è:", epsi_tot_min,"con una T_min di",T_min
+        write(ioDarkError,*)"La luminosità max è", Lumi_DM,"con una T_max di:",T_max,"la luminosità min è:", epsi_tot_min,"con una T_min di",T_min
         
         if ( ioDarkError_on_off==1 ) then !Attivo la scrittura della scrittura, disattivarla salva spazio su disco
             
@@ -247,15 +259,15 @@ subroutine convergenza_epsi_DM(epsi_DM_tot,T_DM,NMD,tempo)
                             "Delta m"
         
             !Risetto le variabili della luminosità totale a 0 per poter riscrivere punto per punto nel file di errore il loro andamento
-            epsi_DM_tot=0
+            Lumi_DM=0
             epsi_tot_min=0
 
             !Mi salvo i vari valori per ogni shell nel file di errore
             do i=1,MAXME
-                epsi_DM_tot=epsi_DM_tot+(epsi_DM(i)*(G(5,i+1)-G(5,i))*1e33)
+                Lumi_DM=Lumi_DM+(epsi_DM(i)*(G(5,i+1)-G(5,i))*1e33)
                 epsi_tot_min=epsi_tot_min+(epsi_DM_min(i)*(G(5,i+1)-G(5,i))*1e33)
                 write(ioDarkError,'(ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15)')epsi_DM(i),char(9),&
-                                                                              epsi_DM_tot,char(9),&
+                                                                              Lumi_DM,char(9),&
                                                                               epsi_DM_min(i),char(9),&
                                                                               epsi_tot_min,char(9),&
                                                                               T_mesh(i),char(9),&
@@ -274,21 +286,50 @@ subroutine convergenza_epsi_DM(epsi_DM_tot,T_DM,NMD,tempo)
     endif
 
     !Uso metodo di bisezione per trovare la T_DM
-    do i=1,max_cicli
+    do i=1,max_cicli+N_cicli_extra_convergenza_DM
         
         !Mi calcolo il rapporto tra la luminosità della DM e quella totale
-        Rapporto_Lumi_DM=abs(epsi_DM_tot)*1e-32/&
+        Rapporto_Lumi_DM=abs(Lumi_DM)*1e-32/&
                         (10.0**(ELLOG)*&
                         38.27)!Luminosità solare *10^-32 erg/s
 
         if(Rapporto_Lumi_DM<=errore_max) then !Se il rapporto tra la luminosità DM e quella totale è sotto una certa soglia esco dal ciclo
             if ( i==1 ) then
                 write(*,*)"La temperatura della DM è uguale a quella massima della stella e vale:",T_DM,"err_max",errore_max,"Rapporto",Rapporto_Lumi_DM
-            end if        
+            end if
+            
+            if ( i>max_cicli .and. on_off_Error_DM_aggiuntivi==1 .and. ioDarkError_on_off==1 ) then
+                write(ioDarkError,'(A)')"CONVERGE"
+                write(ioDarkError, '(A, A, A, A, A, A, A, A, A, A, A)')"#_Modello",char(9)//char(9),&
+                "Tempo_yr",char(9)//char(9)//char(9)//char(9),&
+                "T_DM-1e-6kel",char(9)//char(9)//char(9)//char(9),&
+                "Luminosità_DM",char(9)//char(9)//char(9)//char(9),&
+                "Lum_tot",char(9)//char(9)//char(9)//char(9),"L_DM/L_tot"
+                !Mi salva le varie info per quando la T_DM non converge
+                write(ioDarkError,'(I0, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15)')NMD,char(9),Tempo,char(9),T_DM,char(9),Lumi_DM,char(9),&
+                10.00**(ELLOG)*38.27*1e32,char(9),Rapporto_Lumi_DM
+                if ( ioDarkError_on_off==1 ) then !Abilito la scrittura delle variabili mesh per mesh, disattivare per salvare spazio nel disco
+                    write(ioDarkError,'(A)')"##################"
+                    write(ioDarkError,'(A)')"# Andamento  epsi#"
+                    write(ioDarkError,'(A)')"##################"
+                    write(ioDarkError,'(A)')"mesh"//char(9)//char(9)//&
+                                        "epsi[erg/(gs)]"//char(9)//char(9)//char(9)//char(9)//&
+                                        "R"//char(9)//char(9)//char(9)//char(9)//char(9)//char(9)//&
+                                        "deltaR"//char(9)//char(9)//char(9)//char(9)//char(9)//char(9)//char(9)//&
+                                        "m"//char(9)//char(9)//char(9)//char(9)//char(9)//char(9)//char(9)//&
+                                        "deltaM"
+                    do j = 1, MAXME
+                        write(ioDarkError,'(I0, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15)')j,char(9),epsi_DM(j),char(9),G(1,j)*1e10,&
+                                                                                                            char(9),(G(1,j+1)-G(1,j))*1e10,char(9),G(5,j)*1e33,&
+                                                                                                            char(9),(G(5,j+1)-G(5,j))*1e33
+                    end do
+                end if
+            end if
+            
             exit
 
         !Se entro i max_cicli non converge la T_DM mi salvo le varie variabili su un file di errore
-        else if (Rapporto_Lumi_DM>=errore_max .and. i==max_cicli) then
+        else if (Rapporto_Lumi_DM>=errore_max .and. i>=max_cicli) then
             write(*,*)"La temperatura della DM non converge" !Stampa a schermo
 
             write(ioDarkError,*)"###########################################"
@@ -300,7 +341,7 @@ subroutine convergenza_epsi_DM(epsi_DM_tot,T_DM,NMD,tempo)
             "Luminosità_DM",char(9)//char(9)//char(9)//char(9),&
             "Lum_tot",char(9)//char(9)//char(9)//char(9),"L_DM/L_tot"
             !Mi salva le varie info per quando la T_DM non converge
-            write(ioDarkError,'(I0, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15)')NMD,char(9),Tempo,char(9),T_DM,char(9),epsi_DM_tot,char(9),&
+            write(ioDarkError,'(I0, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15)')NMD,char(9),Tempo,char(9),T_DM,char(9),Lumi_DM,char(9),&
             10.00**(ELLOG)*38.27*1e32,char(9),Rapporto_Lumi_DM
             if ( ioDarkError_on_off==1 ) then !Abilito la scrittura delle variabili mesh per mesh, disattivare per salvare spazio nel disco
                 write(ioDarkError,'(A)')"##################"
@@ -319,16 +360,19 @@ subroutine convergenza_epsi_DM(epsi_DM_tot,T_DM,NMD,tempo)
                 end do
             end if
             
-            exit
+            if ( on_off_Error_DM_aggiuntivi/=1 ) then !Se non voglio informazioni aggiuntive, tipo se converge ai passi successivi, al primo errore esco, altrimenti no
+                exit 
+            end if
+
         end if
 
-        epsi_DM_tot_vecchia=epsi_DM_tot !Salvo la epsi_tot precedente per compararla con quella nuova.
+        Lumi_DM_vecchia=Lumi_DM !Salvo la epsi_tot precedente per compararla con quella nuova.
         
         T_DM=(T_max+T_min)/2!Mi calcolo la nuova temperatura della DM
 
-        call epsi_DM_routine(T_DM,epsi_DM_tot)
+        call epsi_DM_routine(T_DM,Lumi_DM)
 
-        if ((epsi_DM_tot >= 0.0d0) == (epsi_DM_tot_vecchia >= 0.0d0))then
+        if ((Lumi_DM >= 0.0d0) == (Lumi_DM_vecchia >= 0.0d0))then
             if ( estremo==1 ) then
                 T_max=T_DM
             else

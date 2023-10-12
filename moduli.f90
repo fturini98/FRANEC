@@ -830,6 +830,9 @@ module Dark_Matter
   integer, parameter :: ioDarkCattura=413 !La unit per il file che mi salva i vari rate di cattura in funzione del tempo per le varie specie chimiche
   integer :: ioDarkCattura_on_off !Per abilitare la scrittura del file di Cattura.
 
+  !######################
+  !Variabili generiche DM
+  !######################
   real :: rho_DM !GeV/(c^2*cm^3)
   real :: sigma0_DM !Sezione d'urto per DM-idrogeno secondo upper limit Xenon-1ton 
   real :: N_DM_tot !Numero di particelle all'intermo della struttura per passo temporale
@@ -842,6 +845,29 @@ module Dark_Matter
   !Questo serve per la funzione di cattura
   real :: v_star=220d0 !km/s In questo caso scelgo la velocità del Sole
   real :: v_disp=270d0 !Km/s Uso sempre il Sole
+
+  !##########################
+  !Variabili convergenza T_DM
+  !##########################
+
+  integer :: N_cicli_extra_convergenza_DM,& !Cicli extra da fare quando voglio l'andamento per l'epsi ai cicli di convergenza successivi
+             on_off_Error_DM_aggiuntivi !Flag per attivare la stampa nel file DarkMatterERROR.DAT dell'andamento dell'epsi ai cicli
+             !successivi di convergenza dopo aver superato il limite max_cicli per cui considero che la DM non converga. 
+             !Se entro max_cicli+N_cicli_extra_convergenza_DM la T_DM converge allora stampa anche l'epsi che è andata a convergenza
+
+  !######################
+  !Variabili per la optim
+  !######################
+
+  real :: Lumi_DM_positiva,&!La somma di tutti i contributi positivi della luminosità della DM
+          Lumi_DM_negativa!La somma di tutti i contributi negativi della luminosità della DM
+  
+  integer :: on_off_fine_mesh_DM,&!Serve a attivare il criterio di infittimento dei mesh per la DM
+             N_min_mesh_DM,& !Il numero minimo di mesh su cui la componente della luminosità positiva/negativa deve essere divisa
+             N_mesh_aggiunti_DM !Un parametro per spostare verso i mesh più esterni l'infittimento, infatti se infittisce troppo al centro
+             !La ciacio impazzisce(Consiglio minimo 3)
+            
+
 end module Dark_Matter
 
 module FUNZIONI
@@ -891,7 +917,7 @@ module Asplund_per_DM
 
   implicit none
 
-  integer :: on_off_DM_Asplund=0!Flag per attivare o disattivare gli elementi più pesanti guardando le abbondanze da asplung
+  integer :: on_off_DM_Asplund!Flag per attivare o disattivare gli elementi più pesanti guardando le abbondanze da asplung
 
   character(2), dimension(69) :: elementi_asplund=&
     ['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', &

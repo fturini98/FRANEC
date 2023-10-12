@@ -32,6 +32,7 @@ program STELEV
   use mesh
   use costanti
   use Dark_Matter
+  use Asplund_per_DM
 
   implicit none
 
@@ -90,7 +91,7 @@ program STELEV
 
   !Variabili Dark Matter stile WIMP//FRANCESCO
   integer :: on_off_DM ! Se on_off_DM=1 c'é la DM, se on_off_DM=0, non c'è la DM
-  real :: epsi_DM_tot,T_DM,LOGN_DM_tot !La luminosità totale della DM e la temperatura della DM
+  real :: Lumi_DM,T_DM,LOGN_DM_tot !La luminosità totale della DM e la temperatura della DM
   real :: C_tot !Rate di cattura per il modello
   
 
@@ -178,6 +179,25 @@ program STELEV
   ioDarkCattura_on_off=0 !Abilita la scrittura di DarkMatterCattura.DAT
   ioDarkError_on_off=0 !Abilita la scrittura della struttura in caso di errore
   !Se disattivato comunque scrive alcune info sui modelli problematici
+
+  !############
+  !fine mesh DM
+  !############
+  on_off_fine_mesh_DM=0 !Attiva l'infittimento dei mesh su un criterio basato sulle condizioni di epsi_DM
+  N_min_mesh_DM=100 !Numero minimo di mesh su cui deve essere distribuita la luminosità della DM positiva/negativa
+  N_mesh_aggiunti_DM=3 !offset punto di partenza per infittimento DM, minimo 3 o ciacio ipazzisce se infittisci troppo al centro
+
+  !###########################
+  !elementi cattura aggiuntivi
+  !###########################
+  on_off_DM_Asplund=0 !Attiva elementi aggiuntivi seguendo l'abbondaza chimica di Asplund 2009
+
+  !################
+  !Convergenza T_DM
+  !################
+
+  on_off_Error_DM_aggiuntivi=0 !Attiva i cicli aggiuntivi per la convergenza della T_DM e stampa la struttura quando converge dopo che non ha raggiunto la convergenza
+  N_cicli_extra_convergenza_DM=3 !Cicli aggiuntivi di iterazione per la convergenza della DM
 
   ! KSA = IPRALL
   ! KSB=N PRINTA OGNI N MODELLI
@@ -585,7 +605,7 @@ program STELEV
             !si calcola quanta DM cattura, che infulenzerà la struttura dal 4 ciclo in poi.
             call Cattura_DM(NMD,Tempo,C_tot)!Mi restituisce il rate di cattura nell'intervallo HT1,
             !serve restituirlo solo per salvarlo nel file DarkMatter.DAT
-            call convergenza_epsi_DM(epsi_DM_tot,T_DM,NMD,Tempo)
+            call convergenza_epsi_DM(Lumi_DM,T_DM,NMD,Tempo)
          endif
 
          !Stampa dell'epsi calcolata
@@ -593,7 +613,7 @@ program STELEV
             !totale in quanto i primi 3 servono solo a fare la convergenza per la partenza
             ! e la epsi viene calcolata al ciclo successivo
             if(ioDark_on_off==1)then!Abilito o meno la scrittura del file DarkMatter.DAT in base alle necesità di spazio sul disco
-               call stampa_epsi_DM(NMD,epsi_DM_tot,T_DM,Tempo,C_tot)!Mi salvo varie variabile relative all'epsi_DM nel file DarkMatter.DAT
+               call stampa_epsi_DM(NMD,Lumi_DM,T_DM,Tempo,C_tot)!Mi salvo varie variabile relative all'epsi_DM nel file DarkMatter.DAT
             end if
          end if
       endif
@@ -766,7 +786,7 @@ program STELEV
      
      XXV(1:mele,1:maxme) = XXX(1:mele,1:maxme)
      if(NMD >= 3 .and. KSE == 0 .and. MODELLO >= 2) then
-        call OPTIM(MAXME,SCALA,FG3,ENCNO, URA,ULA,UPA,UTA,UMA,VMM,fase)
+        call OPTIM(MAXME,SCALA,FG3,ENCNO, URA,ULA,UPA,UTA,UMA,VMM,fase,T_DM)
      endif
 
      ICHIM = 0

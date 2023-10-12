@@ -17,9 +17,14 @@ Le basi da cui si è partiti per sviluppare il codice sono:
 - La WIMP ha una sezione d'urto molto bassa tale che siamo nel regime di **Kundsen** (Vale a dire si considera isoterma su tutta la struttura.)
 
 ## Indice
+
+- [Flag relative alla DM](#flag-relative-alla-dm)
+
 - [Modifiche rispetto a FRANEC standard](#modifiche-rispetto-franec-standard)
 
 - [Subroutine per la DM](#subroutine-per-la-dm)
+
+## Flag relative alla DM
 
 ## Modifiche rispetto FRANEC  standard
 - Creazione dei file:
@@ -41,6 +46,14 @@ Le basi da cui si è partiti per sviluppare il codice sono:
             - **ioDarkMatter.o**, he legge e interpreta il file ioDarkMatter.f90 e genera il file ioDarkMatter.o da usare nel programma.
 
     - **franec.f90**:
+
+- **moduli.f90**:
+
+- **optim.f90**: E' stata aggiunta una condizione attivabile tramite la flag **on_off_fine_mesh_DM**==1, che permette di infittire i mesh su una condizione basata sulla epi_DM. Tale condizione vuole che la parte della luminosità della DM positiva/negativa sia distribuita almeno su *N_min_mesh_DM*. Attivando tale criterio di infittimento l'effetto è quello di infittire i mesh molto vicini al centro, questo può creare problemi alla routine ciacioLi, quindi è possibile spostare il mesh di partenza dell'infittimento tramite l'offset *N_mesh_aggiunti_DM*(il minimo consigliato è 3).
+    
+    **Attenzione:**
+        
+    - L'infittimento dei mesh tramite questa condizione è comunque sconsigliato perché da problemi alla ciacioLi.
 
 - Sono stati modificati i programmi
     - [**lancia.c**](./../../Gestione_lancia/lancia.c)
@@ -71,6 +84,8 @@ Le basi da cui si è partiti per sviluppare il codice sono:
         - *Numero di particelle di Dark Matter catturate nel passo temporale*
         - *Numero totale di particelle catturate fino a quell'istante di tempo dalla struttura*
         - *Rate di cattura deboli per ogni singolo elemento*
+
+    Tramite la flag *on_off_DM_Asplund=1* è possibile aggiungere elementi ulteriori che concorrono alla cattura oltre a quelli definiti nei moduli della chimica. Il principo di base è considerare come se tutti questi nuovi elementi diffondano come il ferro e ,dato che non concorrono nelle reazioni nucleari, il rapporto $X_{Fe}/X_{ele}$ è costante per ogni mesh. Si prendono come abbondanze iniziali quelle solari date da Asplund 2009. Si noti che tali elementi hanno effetti in stelle Sun like inferiori all'errore macchina, quindi si consiglia di disattivare la flag.
 
     - **Cattura_DM_geometrica** : La routine si calcola il rate di cattura geometrico della stella, necessario per calcolarsi l'effetto di saturazione della cattura
 

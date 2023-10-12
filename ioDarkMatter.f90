@@ -1,4 +1,4 @@
-subroutine stampa_epsi_DM(NMD,epsi_DM_tot,T_DM,Tempo,C_tot)
+subroutine stampa_epsi_DM(NMD,Lumi_DM,T_DM,Tempo,C_tot)
 !Questa subroutine serve a stamaprsi i vari valori dell'epsi totale relativa alla DM.
 !Il file relativo si chiama epsi_DM e la sua unit vale unit=ioDark==411(è definita all'interno del moduleo Dark_Matter)
         
@@ -10,7 +10,7 @@ subroutine stampa_epsi_DM(NMD,epsi_DM_tot,T_DM,Tempo,C_tot)
     
         integer :: NMD !Il numero del modello corrente
 
-        real :: epsi_DM_tot,&!La luminosità totale della DM
+        real :: Lumi_DM,&!La luminosità totale della DM
                 T_DM,&!temperatura della DM
                 Tempo,&!Età della stella
                 Rapporto_Lumi_DM,&! Rapporto tra luminosità totale e della DM
@@ -29,8 +29,8 @@ subroutine stampa_epsi_DM(NMD,epsi_DM_tot,T_DM,Tempo,C_tot)
                         
             first_DM_write=0
         endif
-        Rapporto_Lumi_DM=abs(epsi_DM_tot)*1e-32/&
+        Rapporto_Lumi_DM=abs(Lumi_DM)*1e-32/&
                             (10.0**(ELLOG)*&
                             38.27)!Luminosità solare *10^-32 erg/s
-        write(ioDark,'(I0, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15)')NMD,char(9),Tempo,char(9),10.0**TEFF,char(9),10.0**(ELLOG)*38.27*1e32,char(9),T_DM,char(9),C_tot,char(9),epsi_DM_tot,char(9),Rapporto_Lumi_DM,char(9),N_DM_tot
+        write(ioDark,'(I0, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15)')NMD,char(9),Tempo,char(9),10.0**TEFF,char(9),10.0**(ELLOG)*38.27*1e32,char(9),T_DM,char(9),C_tot,char(9),Lumi_DM,char(9),Rapporto_Lumi_DM,char(9),N_DM_tot
     end subroutine stampa_epsi_DM
