@@ -80,8 +80,12 @@ Per testare il codice, dopo la compilazione, si possono utilizzare 3 prinicpali 
 - **[X]** Sistemare il rapporto epsi_DM/epsi_tot, deve venire uguale su i due file
 - **[]** Cambia criterio criterio convergenza
 - **[]** File fase evolutiva out
-
+- **[]** Sistemare potenziale gravitazionale in epsi
 ## Cose da commentare
 
 - tutte le flag
+
+# comandi
+df -h
+du -h --max-depth=1 | sort -hr
 

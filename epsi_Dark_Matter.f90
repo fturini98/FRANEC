@@ -96,6 +96,7 @@ subroutine epsi_DM_routine(T_DM,Lumi_DM)
     Lumi_DM=0!Inizializzo la funzione cumulartiva della epsi a 0
     Lumi_DM_positiva=0!Inizializo la funzione cumulativa della Luminosità positiva a 0
     Lumi_DM_negativa=0!Inizializo la funzione cumulativa della Luminosità negativa a 0
+    Max_Lumi_DM=0!Inizializzo a o il massimo del modulo della luminosità a 0.
     
     do i = 1, MAXME!Loop sui mesh
         epsi_DM(i)=0 !Lo setto a zero per poi sommarci su ad ogni elemento
@@ -125,7 +126,9 @@ subroutine epsi_DM_routine(T_DM,Lumi_DM)
                 Lumi_DM_negativa=Lumi_DM_negativa+Lumi_mesh
             end if
 
-
+            if ( abs(Lumi_DM)>Max_Lumi_DM ) then!Cerco il valore massimo del modulo della luminosità dovuta alla DM
+                Max_Lumi_DM=abs(Lumi_DM)       
+            end if
             
             !Errore a schermo per quando il delta m al maxme è minore di 0
             if((M_mesh(i+1)-M_mesh(i))<0 .and. i/=MAXME )then 
@@ -174,7 +177,7 @@ subroutine convergenza_epsi_DM(Lumi_DM,T_DM,NMD,tempo)
     real :: Lumi_DM,& !Epsi cumulativa totale secondo la formula di Spergel and Press(Luminosità DM)
             T_DM,& !Temperatura della Dark Matter
             Lumi_DM_vecchia,&!Variabile di supporto per salvarmi la luminosità della DM durante la convergenza
-            errore_max=1e-3,& !Il valore limite per cui si ritiene che l'errore che si commette è trascurabile(Rapporto tra epsi e epsi tot)
+            errore_max=5e-4,& !Il valore limite per cui si ritiene che l'errore che si commette è trascurabile(Rapporto tra epsi e epsi tot)
             Rapporto_Lumi_DM,&
             Tempo,&
             epsi_tot_min
@@ -227,6 +230,8 @@ subroutine convergenza_epsi_DM(Lumi_DM,T_DM,NMD,tempo)
     call epsi_DM_routine(T_DM,Lumi_DM)
     estremo=1
     
+    !Mi calcolo il rapporto tra la luminosità della DM al bordo e quella massima
+    Rapporto_Lumi_DM=abs(Lumi_DM)/Max_Lumi_DM
     
     !##############################
     !#      ERRORE GRAVE          #
@@ -288,14 +293,12 @@ subroutine convergenza_epsi_DM(Lumi_DM,T_DM,NMD,tempo)
     !Uso metodo di bisezione per trovare la T_DM
     do i=1,max_cicli+N_cicli_extra_convergenza_DM
         
-        !Mi calcolo il rapporto tra la luminosità della DM e quella totale
-        Rapporto_Lumi_DM=abs(Lumi_DM)*1e-32/&
-                        (10.0**(ELLOG)*&
-                        38.27)!Luminosità solare *10^-32 erg/s
+        !Mi calcolo il rapporto tra la luminosità della DM al bordo e quella massima
+        Rapporto_Lumi_DM=abs(Lumi_DM)/Max_Lumi_DM
 
-        if(Rapporto_Lumi_DM<=errore_max) then !Se il rapporto tra la luminosità DM e quella totale è sotto una certa soglia esco dal ciclo
+        if(Rapporto_Lumi_DM<=errore_max) then !Se il rapporto tra la luminosità DM al bordo e quella massima è sotto una certa soglia esco dal ciclo
             if ( i==1 ) then
-                write(*,*)"La temperatura della DM è uguale a quella massima della stella e vale:",T_DM,"err_max",errore_max,"Rapporto",Rapporto_Lumi_DM
+                write(*,*)"La temperatura della DM è uguale a quella massima della stella e vale:",T_DM,"err_max",errore_max,"Rapporto",Rapporto_Lumi_DM,"Lumi_DM",Lumi_DM,"Max_lumi",Max_Lumi_DM
             end if
             
             if ( i>max_cicli .and. on_off_Error_DM_aggiuntivi==1 .and. ioDarkError_on_off==1 ) then
@@ -304,7 +307,7 @@ subroutine convergenza_epsi_DM(Lumi_DM,T_DM,NMD,tempo)
                 "Tempo_yr",char(9)//char(9)//char(9)//char(9),&
                 "T_DM-1e-6kel",char(9)//char(9)//char(9)//char(9),&
                 "Luminosità_DM",char(9)//char(9)//char(9)//char(9),&
-                "Lum_tot",char(9)//char(9)//char(9)//char(9),"L_DM/L_tot"
+                "Lum_tot",char(9)//char(9)//char(9)//char(9),"L_DM(R)/max(L_DM)"
                 !Mi salva le varie info per quando la T_DM non converge
                 write(ioDarkError,'(I0, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15)')NMD,char(9),Tempo,char(9),T_DM,char(9),Lumi_DM,char(9),&
                 10.00**(ELLOG)*38.27*1e32,char(9),Rapporto_Lumi_DM
@@ -339,7 +342,7 @@ subroutine convergenza_epsi_DM(Lumi_DM,T_DM,NMD,tempo)
             "Tempo_yr",char(9)//char(9)//char(9)//char(9),&
             "T_DM-1e-6kel",char(9)//char(9)//char(9)//char(9),&
             "Luminosità_DM",char(9)//char(9)//char(9)//char(9),&
-            "Lum_tot",char(9)//char(9)//char(9)//char(9),"L_DM/L_tot"
+            "Lum_tot",char(9)//char(9)//char(9)//char(9),"L_DM(R)/max(L_DM)"
             !Mi salva le varie info per quando la T_DM non converge
             write(ioDarkError,'(I0, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15)')NMD,char(9),Tempo,char(9),T_DM,char(9),Lumi_DM,char(9),&
             10.00**(ELLOG)*38.27*1e32,char(9),Rapporto_Lumi_DM

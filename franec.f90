@@ -175,7 +175,7 @@ program STELEV
   sigma0_DM=1e-40   ! Sezione d'urto DM-idrogeno in cm^2
 
   !Abilitazione scrittura file di output relativi alla DM
-  ioDark_on_off=0 !Abilita la scirttura di DarkMatter.DAT
+  ioDark_on_off=1 !Abilita la scirttura di DarkMatter.DAT
   ioDarkCattura_on_off=0 !Abilita la scrittura di DarkMatterCattura.DAT
   ioDarkError_on_off=0 !Abilita la scrittura della struttura in caso di errore
   !Se disattivato comunque scrive alcune info sui modelli problematici

@@ -854,6 +854,8 @@ module Dark_Matter
              on_off_Error_DM_aggiuntivi !Flag per attivare la stampa nel file DarkMatterERROR.DAT dell'andamento dell'epsi ai cicli
              !successivi di convergenza dopo aver superato il limite max_cicli per cui considero che la DM non converga. 
              !Se entro max_cicli+N_cicli_extra_convergenza_DM la T_DM converge allora stampa anche l'epsi che è andata a convergenza
+             
+  real :: Max_Lumi_DM!Massima luminosità della DM, serve a rinormalizzare l'integrale dell'epsi per definire lo zero dell'integrale discretizato.
 
   !######################
   !Variabili per la optim
