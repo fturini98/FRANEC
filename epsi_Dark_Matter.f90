@@ -24,11 +24,16 @@ subroutine epsi_DM_routine(T_DM,Lumi_DM)
 
     integer :: i,j, & !indice
                ele !indice per elementi
+    
+    real :: M_sup,&!Massa della stella
+            R_sup!Raggio stella
 
 
     real,dimension(LIM) :: T_mesh,& !Variabile per salvare la temperatura della stella
                            M_mesh,& !Variabile di supporto per l'array dei raggi
                            exp_dist_DM !Fattore esponenziale della distirbuzione della DM
+
+    real, dimension(MAXME):: phi!Array del potenziale gravitazionale ridotto
 
     real :: T_DM,& !Temperatura della DM per cui si calcola l'epsi_DM
             sigma_ele,& !Sezione d'urto per elemento
@@ -40,6 +45,24 @@ subroutine epsi_DM_routine(T_DM,Lumi_DM)
     !##########################
     !Inizializzazione variabili
     !##########################
+    
+    !Mi trovo raggio e massa della stella
+    R_sup=G(1,MAXME)
+    M_sup=G(5,MAXME)
+
+
+    !Calcolo il potenziale gravitazionale Ridotto        
+    phi(MAXME)=1.00
+    do  i= (MAXME-1),1 , -1! ciclo dall'esterno all'interno per calcolarsi phi secondo 
+    !https://articles.adsabs.harvard.edu/cgi-bin/nph-iarticle_query?1991ApJ...368..626D&defaultprint=YES&filetype=.pdf
+    !Per denistà costante è come l'integrale di Gaus per una sfera uniformemente carica
+        if ( i==1 ) then
+            phi(i)=phi(i+1)+R_sup/M_sup*((G(5,2)+G(5,1))/2)/(((G(1,2)+G(1,1))/2)**2)*G(1,2)!Questo serve a evitare il diviso 0 al centro, uso come valori di fisica della shell quelli dell'intershell
+        else
+            phi(i)=phi(i+1)+R_sup/M_sup*(G(5,i)/(G(1,i)**2))*(G(1,i+1)-G(1,i))
+        end if
+               
+    end do
     
     do i = 1,MAXME
     !Ciclo per caricare l'array della temperatura dalla matrice G
@@ -62,30 +85,12 @@ subroutine epsi_DM_routine(T_DM,Lumi_DM)
         !Calcolo exp(-m_DM*V(r)/K_b T_DM) e la sua normal.
         !per calcolarmi l'array della densità della DM
         !#################################################
+        exp_dist_DM(i)=exp((mass_DM*GeV_grammi*&!Nell'esponenziale ci va il + perché il potenziale gravitazionale è definito 
+        !con il meno mentre io calcolo il suo modulo, quindi -*-=+
+        ((Ggrav*M_sup/R_sup)*phi(i)*1e23))/&
+        (Kboltz*T_DM*1e6))
 
-        if ( i==1 .or. G(1,i)==0 ) then !Questo if serve ad evitare problemi del divided by 0 del raggio nella shell più interna
-            
-            exp_dist_DM(i)=exp(-(mass_DM*GeV_grammi*&
-            (Ggrav*(G(5,i)+G(5,i+1))/(G(1,i)+G(1,i+1))*1e23))/&!Ho fatto la media tra il mesh i e il mesh i+1 per le variabili fisiche
-            (Kboltz*T_DM*1e6))
-
-            norm_DM_distr=((G(1,i)+G(1,i+1))/2)**2*(G(1,i+1)-G(1,i))*exp_dist_DM(i)*1e30
-
-            if (G(1,i+1)==0 ) then!Questo serve a prendere in considerazione quando il raggio è messo
-            ! a 0 sia nel mesh i che nel mesh i+1
-
-            exp_dist_DM(i)=0!Setto a 0 la distribuzione di DM perché qui non ho definito il potenziale grav.
-
-            endif
-        
-        else if (G(1,i)/=0) then
-
-            exp_dist_DM(i)=exp(-(mass_DM*GeV_grammi*&
-            (Ggrav*(G(5,i))/(G(1,i))*1e23))/&
-            (Kboltz*T_DM*1e6))
-
-            norm_DM_distr=((G(1,i))**2*(G(1,i+1)-G(1,i))*exp_dist_DM(i)*1e30)+norm_DM_distr
-        end if
+        norm_DM_distr=((4*pigre*G(1,i))**2*(G(1,i+1)-G(1,i))*exp_dist_DM(i)*1e30)+norm_DM_distr
 
     end do
 
@@ -177,7 +182,7 @@ subroutine convergenza_epsi_DM(Lumi_DM,T_DM,NMD,tempo)
     real :: Lumi_DM,& !Epsi cumulativa totale secondo la formula di Spergel and Press(Luminosità DM)
             T_DM,& !Temperatura della Dark Matter
             Lumi_DM_vecchia,&!Variabile di supporto per salvarmi la luminosità della DM durante la convergenza
-            errore_max=5e-4,& !Il valore limite per cui si ritiene che l'errore che si commette è trascurabile(Rapporto tra epsi e epsi tot)
+            errore_max=1e-4,& !Il valore limite per cui si ritiene che l'errore che si commette è trascurabile(Rapporto tra epsi e epsi tot)
             Rapporto_Lumi_DM,&
             Tempo,&
             epsi_tot_min
@@ -189,6 +194,12 @@ subroutine convergenza_epsi_DM(Lumi_DM,T_DM,NMD,tempo)
 
     real,dimension(LIM) :: T_mesh,epsi_DM_min
 
+    !##############################################
+    !Variabili per killare franec in caso di errore
+    !##############################################
+    ! Comando e argomenti
+    character(100) :: command
+    command="killall -9 franec Lancia"
     !#########################
     !Inizializazione variabili
     !#########################
@@ -311,22 +322,23 @@ subroutine convergenza_epsi_DM(Lumi_DM,T_DM,NMD,tempo)
                 !Mi salva le varie info per quando la T_DM non converge
                 write(ioDarkError,'(I0, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15)')NMD,char(9),Tempo,char(9),T_DM,char(9),Lumi_DM,char(9),&
                 10.00**(ELLOG)*38.27*1e32,char(9),Rapporto_Lumi_DM
-                if ( ioDarkError_on_off==1 ) then !Abilito la scrittura delle variabili mesh per mesh, disattivare per salvare spazio nel disco
-                    write(ioDarkError,'(A)')"##################"
-                    write(ioDarkError,'(A)')"# Andamento  epsi#"
-                    write(ioDarkError,'(A)')"##################"
-                    write(ioDarkError,'(A)')"mesh"//char(9)//char(9)//&
+                write(ioDarkError,'(A)')"##################"
+                write(ioDarkError,'(A)')"# Andamento  epsi#"
+                write(ioDarkError,'(A)')"##################"
+                write(ioDarkError,'(A)')"mesh"//char(9)//char(9)//&
                                         "epsi[erg/(gs)]"//char(9)//char(9)//char(9)//char(9)//&
                                         "R"//char(9)//char(9)//char(9)//char(9)//char(9)//char(9)//&
                                         "deltaR"//char(9)//char(9)//char(9)//char(9)//char(9)//char(9)//char(9)//&
                                         "m"//char(9)//char(9)//char(9)//char(9)//char(9)//char(9)//char(9)//&
                                         "deltaM"
-                    do j = 1, MAXME
-                        write(ioDarkError,'(I0, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15)')j,char(9),epsi_DM(j),char(9),G(1,j)*1e10,&
+                do j = 1, MAXME
+                    write(ioDarkError,'(I0, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15, A, ES25.15)')j,char(9),epsi_DM(j),char(9),G(1,j)*1e10,&
                                                                                                             char(9),(G(1,j+1)-G(1,j))*1e10,char(9),G(5,j)*1e33,&
                                                                                                             char(9),(G(5,j+1)-G(5,j))*1e33
-                    end do
-                end if
+                end do
+                
+                ! Esegui il comando per bloccare franec utilizzando execute_command_line
+                call system(command)
             end if
             
             exit

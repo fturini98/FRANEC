@@ -176,16 +176,16 @@ program STELEV
 
   !Abilitazione scrittura file di output relativi alla DM
   ioDark_on_off=1 !Abilita la scirttura di DarkMatter.DAT
-  ioDarkCattura_on_off=0 !Abilita la scrittura di DarkMatterCattura.DAT
-  ioDarkError_on_off=0 !Abilita la scrittura della struttura in caso di errore
+  ioDarkCattura_on_off=1 !Abilita la scrittura di DarkMatterCattura.DAT
+  ioDarkError_on_off=1 !Abilita la scrittura della struttura in caso di errore
   !Se disattivato comunque scrive alcune info sui modelli problematici
 
   !############
   !fine mesh DM
   !############
-  on_off_fine_mesh_DM=0 !Attiva l'infittimento dei mesh su un criterio basato sulle condizioni di epsi_DM
+  on_off_fine_mesh_DM=1 !Attiva l'infittimento dei mesh su un criterio basato sulle condizioni di epsi_DM
   N_min_mesh_DM=100 !Numero minimo di mesh su cui deve essere distribuita la luminosità della DM positiva/negativa
-  N_mesh_aggiunti_DM=3 !offset punto di partenza per infittimento DM, minimo 3 o ciacio ipazzisce se infittisci troppo al centro
+  N_mesh_aggiunti_DM=5 !offset punto di partenza per infittimento DM, minimo 3 o ciacio ipazzisce se infittisci troppo al centro
 
   !###########################
   !elementi cattura aggiuntivi
@@ -196,7 +196,7 @@ program STELEV
   !Convergenza T_DM
   !################
 
-  on_off_Error_DM_aggiuntivi=0 !Attiva i cicli aggiuntivi per la convergenza della T_DM e stampa la struttura quando converge dopo che non ha raggiunto la convergenza
+  on_off_Error_DM_aggiuntivi=1 !Attiva i cicli aggiuntivi per la convergenza della T_DM e stampa la struttura quando converge dopo che non ha raggiunto la convergenza
   N_cicli_extra_convergenza_DM=3 !Cicli aggiuntivi di iterazione per la convergenza della DM
 
   ! KSA = IPRALL

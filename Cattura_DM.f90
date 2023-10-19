@@ -23,6 +23,8 @@ subroutine Cattura_DM_geom(C_geom,v_esc,xi_DM,M_sup,R_sup)
    use chim
    !Il modulo chim serve per definire l' array XX(MAXME)(vale a dire l'abbondanza totale dell'elemento i-esimo), il passo temporale HT1 etc..
    
+   use mesh
+   !Serve per trovare il MAXME
 
    implicit none
    
@@ -44,19 +46,11 @@ subroutine Cattura_DM_geom(C_geom,v_esc,xi_DM,M_sup,R_sup)
    !Prima mi serve il fattore di soppressione dovuto al movimento del sole all'interno della stella xi_DM
    !che è dipendente dalla velocità di fuga superficilae
    
-   do k = 1, LIM !Loop per trovare i valori della struttura sulla superficie
-      if (G(1,k)/=0) then 
-         R_sup=G(1,k)
-      endif
-
-      if (G(5,k)/=0)then
-         M_sup=G(5,k)
-      endif
-      
-   end do
+   R_sup=G(1,MAXME)
+   M_sup=G(5,MAXME)
    
    !Calcolo la velocità di fuga superficiale
-   v_esc=sqrt(2*Ggrav*M_sup/R_sup*1e23)*1e-5
+   v_esc=sqrt(2*Ggrav*M_sup/R_sup*1e23)*1e-5 !la velocità di fuga é in Km/s per usarla in xi_DM che richiede le velcocità in km/s
    
    !Calcolo il fattore corettivo dovuto al moto della stella
    call xi_DM_sub(v_esc,xi_DM)
@@ -91,6 +85,18 @@ subroutine xi_DM_sub(v_esc,  xi_DM)
 
    
 end subroutine xi_DM_sub
+
+subroutine Chi_DM(a,  b, chi)
+!Subroutine per calcolarsi il fattore chi dell'articolo di Gould1987
+   use costanti
+   use FUNZIONI !Serve per l'erf
+
+   real, intent(in) :: a,b
+   real, intent(out) ::  chi
+
+   chi=(sqrt(pigre)/2)*(erf(b)-erf(a))
+   
+end subroutine Chi_DM
 
 subroutine Cattura_DM(NMD,Tempo,C_tot)
 !Calcolo il rate di cattura e trascurando l'evaporazione della DM assegno a N_tot_DM (definito in Dark_Matter) il numero totale di particelle
@@ -139,8 +145,12 @@ subroutine Cattura_DM(NMD,Tempo,C_tot)
          M_sup,&!Massa totale della stella
          R_sup,&!Raggio stella
          fattore_mediato,&!Fattore mediato con dentro il potenziale grav. ridotto
+         fattore_mediato_mesh,&!Fattore mediato con dentro il potenziale grav. ridotto (valore al mesh)
          v_esc_mesh,& !Velocità di fuga mesh per mesh
          A_mesh_ele_quad,&!Fattore A dlell'articolo di Gould
+         A_p_mesh,A_m_mesh,&!Fattori A_+ e A_- dell'articolo di Gould
+         eta,& !Fattore eta di Gould
+         chi_A,chi_eta,& !Fattori Chi della formula di Gould
          mu, mu_men!Fattori mu dell'articolo di Gould
 
    real, dimension(MAXME):: phi!Array del potenziale gravitazionale ridotto
@@ -162,10 +172,15 @@ subroutine Cattura_DM(NMD,Tempo,C_tot)
 
    call Cattura_DM_geom(C_geom,v_esc,xi_DM,M_sup,R_sup)
 
+   eta=sqrt(3.0/2.0)*(v_star/v_disp)
+
    C_weak=0!Setto la cattura debole a 0 per sommarci sopra per ogni elemento
 
+
+   !Calcolo il potenziale gravitazionale ridotto
    phi(MAXME)=1.00
-   do  i= (MAXME-1),1 , -1! ciclo dall'esterno all'interno per calcolarsi phi secondo 
+   do  i= (MAXME-1),1 , -1
+      ! ciclo dall'esterno all'interno per calcolarsi phi secondo 
       !https://articles.adsabs.harvard.edu/cgi-bin/nph-iarticle_query?1991ApJ...368..626D&defaultprint=YES&filetype=.pdf
       !Per denistà costante è come l'integrale di Gaus per una sfera uniformemente carica
       if ( i==1 ) then
@@ -189,23 +204,31 @@ subroutine Cattura_DM(NMD,Tempo,C_tot)
 
       fattore_mediato=0!Setto a 0 il fattore mediato per sommarci sopra per ogni mesh dato che è un integrale in delta M
       do i = 1, MAXME
-         v_esc_mesh=sqrt(phi(i))*v_esc !Mi calcolo la velocità di fuga mesh per mesh partendo dalla definizione di phi e invertendola. phi=v_esc^2/v_esc(R_sup)^2
-         A_mesh_ele_quad=3/2*(v_esc_mesh/v_disp)**2*(mu/(mu_men**2))
-         call xi_DM_sub(v_esc_mesh,xi_DM_mesh)
-         
+
          if(xx(ele)/=0)then!Serve a evitare il divide by 0 quando xx(ele)==0
-            fattore_mediato=fattore_mediato+(phi(i)*(1-(1-exp(-A_mesh_ele_quad))/(A_mesh_ele_quad))*xi_DM_mesh)*&
+            v_esc_mesh=sqrt(phi(i))*v_esc !Mi calcolo la velocità di fuga mesh per mesh partendo dalla definizione di phi e invertendola. phi=v_esc^2/v_esc(R_sup)^2 é in km/s
+            A_mesh_ele_quad=3/2*(v_esc_mesh/v_disp)**2*(mu/(mu_men**2))!Mi calcolo A^2 di Gould
+            A_p_mesh=sqrt(A_mesh_ele_quad)+eta!Mi calcolo A_+
+            A_m_mesh=sqrt(A_mesh_ele_quad)-eta!Mi calcolo A_-
+            call Chi_DM(-eta,eta,chi_eta)
+            call Chi_DM(A_m_mesh,A_p_mesh,chi_A)
+         
+            fattore_mediato_mesh=(phi(i)*&
+                           (1./(2*eta*A_mesh_ele_quad))*&
+                           ((A_p_mesh*A_m_mesh-1./2)*(chi_eta-chi_A)+&
+                           1./2*A_p_mesh*exp(-(A_m_mesh)**2)-1./2*A_m_mesh*exp(-(A_p_mesh)**2)-eta*exp(-(eta)**2)))*&!devi sostituire l'1 con i vari elementi contenenti A.
                            (G(5,i+1)-G(5,i))*XXX(ele,i)&!Delat m per l'elemento ele-esimo
                            /(M_sup*xx(ele))!Normalizazione per tornare adimensionale della massa dell'elemento ele-esimo
+            fattore_mediato=fattore_mediato+fattore_mediato_mesh
          else
             fattore_mediato=0
          endif
       end do
-      
+
 
       C_weak_ele(ele)=sqrt(8/(3*pigre))*sigma_ele*&!Sto usando la definizione in https://ui.adsabs.harvard.edu/abs/1987ApJ...321..571G/abstract
                  rho_DM/mass_DM*&
-                 v_disp*1e5*&
+                 v_disp*1e5*&!Lo metto in cm/s
                  xx(ele)*(M_sup*1e33)/(massa_ele(ele)*u_to_gramms)*&
                  3/2*(v_esc/v_disp)**2*&
                  fattore_mediato
@@ -241,25 +264,32 @@ subroutine Cattura_DM(NMD,Tempo,C_tot)
             mu=mass_DM*GeV_grammi/(numeri_massa_asplund_DM(ele)*p_mass)
             mu_men=(mu-1)/2
             fattore_mediato=0
-            do i = 1, MAXME
-               
-               Abb_ele=xxx(21,i)**numeri_massa_asplund_DM(ele)/(56.)*&!Il valore 21 nell'array delle abbondaze corrisponde al Fe
+            do i = 1, MAXME         
+               if(Abb_ele/=0)then!Serve a evitare il divide by 0 quando Abb_ele==0
+
+                  Abb_ele_mesh=xxx(21,i)**numeri_massa_asplund_DM(ele)/(56.)*&!Il valore 21 nell'array delle abbondaze corrisponde al Fe
                      10**(dati_asplund_DM(ele)-12.-log10(xxx(21,i)/(xxx(1,i)*56)))
 
-               v_esc_mesh=sqrt(phi(i))*v_esc !Mi calcolo la velocità di fuga mesh per mesh partendo dalla definizione di phi e invertendola.
-               A_mesh_ele_quad=3/2*(v_esc_mesh/v_disp)**2*(mu/(mu_men**2))
-               call xi_DM_sub(v_esc_mesh,xi_DM_mesh)
-               
-               if(Abb_ele/=0) then
-               fattore_mediato=fattore_mediato+(phi(i)*(1-(1-exp(-A_mesh_ele_quad))/(A_mesh_ele_quad))*xi_DM_mesh)*&
+                  v_esc_mesh=sqrt(phi(i))*v_esc !Mi calcolo la velocità di fuga mesh per mesh partendo dalla definizione di phi e invertendola.
+                  A_mesh_ele_quad=3/2*(v_esc_mesh/v_disp)**2*(mu/(mu_men**2))
+                  A_p_mesh=sqrt(A_mesh_ele_quad)+eta!Mi calcolo A_+
+                  A_m_mesh=sqrt(A_mesh_ele_quad)-eta!Mi calcolo A_-
+                  call Chi_DM(-eta,eta,chi_eta)
+                  call Chi_DM(A_m_mesh,A_p_mesh,chi_A)
+
+                  fattore_mediato_mesh=(phi(i)*&
+                           (1./(2*eta*A_mesh_ele_quad))*&
+                           ((A_p_mesh*A_m_mesh-1./2)*(chi_eta-chi_A)+&
+                           1./2*A_p_mesh*exp(-(A_m_mesh)**2)-1./2*A_m_mesh*exp(-(A_p_mesh)**2)-eta*exp(-(eta)**2)))*&!devi sostituire l'1 con i vari elementi contenenti A.
                            (G(5,i+1)-G(5,i))*Abb_ele_mesh&!Delat m per l'elemento ele-esimo
                            /(M_sup*Abb_ele)!Normalizazione per tornare adimensionale della massa dell'elemento ele-esimo
+                  
+                  fattore_mediato=fattore_mediato+fattore_mediato_mesh
                else
-                fattore_mediato=0  
-               endif   
+                  fattore_mediato=0
+               endif
             end do
-         
-   
+            
             C_weak_ele_asplund=sqrt(8/(3*pigre))*sigma_ele*&!Sto usando la definizione in https://ui.adsabs.harvard.edu/abs/1987ApJ...321..571G/abstract
                     rho_DM/mass_DM*&
                     v_disp*1e5*&
