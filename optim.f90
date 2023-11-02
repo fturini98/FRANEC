@@ -1,5 +1,5 @@
   !    QUESTA SUBROUTINE SERVE PER ALTERARE IL NUMERO DEI MESH            
-subroutine OPTIM(MAXME,SCALA,PROVV,ECNO, URA,ULA,UPA,UTA,UMA,VMM, fase,T_DM) 
+subroutine OPTIM(MAXME,SCALA,PROVV,ECNO, URA,ULA,UPA,UTA,UMA,VMM, fase,T_DM,NMD) 
   use interfaccia
   use fisica
   use intero
@@ -13,7 +13,7 @@ subroutine OPTIM(MAXME,SCALA,PROVV,ECNO, URA,ULA,UPA,UTA,UMA,VMM, fase,T_DM)
 
   implicit none
 
-  integer :: MAXME, fase
+  integer :: MAXME, fase, NMD
   real :: SCALA, PROVV, ECNO
   real,dimension(4) :: URA, ULA, UPA, UTA, UMA 
   real,dimension(5) :: VMM
@@ -179,7 +179,9 @@ subroutine OPTIM(MAXME,SCALA,PROVV,ECNO, URA,ULA,UPA,UTA,UMA,VMM, fase,T_DM)
         XSERV(2,N) = XEL 
         MAXME = MAXME+1
         
-        call epsi_DM_routine(T_DM,Lumi_DM)!Calcolo nuovamente l'array dell'epsi_DM per la nuova struttura coi mesh infittiti
+        if ( on_off_fine_mesh_DM==1 ) then !Se non sono interessato all'infittimento su criteri basati sulla DM non mi ricalcolo l'epsi, questo accellera il processo.
+         call epsi_DM_routine(T_DM,Lumi_DM,NMD)!Calcolo nuovamente l'array dell'epsi_DM per la nuova struttura coi mesh infittiti
+        end if
      endif
   end do
   ! FINE FASE INFITTIMENTO MESHPOINTS
@@ -287,7 +289,9 @@ subroutine OPTIM(MAXME,SCALA,PROVV,ECNO, URA,ULA,UPA,UTA,UMA,VMM, fase,T_DM)
         XSERV(2,K-1) = XSERV(2,K) 
      end do
      MAXME = MAXME-1
-     call epsi_DM_routine(T_DM,Lumi_DM)!Calcolo nuovamente l'array dell'epsi_DM per la nuova struttura coi mesh sfittiti 
+     if ( on_off_fine_mesh_DM==1) then !Se non sono interessato all'infittimento su criteri basati sulla DM non mi ricalcolo l'epsi, questo accellera il processo.
+      call epsi_DM_routine(T_DM,Lumi_DM,NMD)!Calcolo nuovamente l'array dell'epsi_DM per la nuova struttura coi mesh sfittiti 
+     end if    
   end do
   ! FINE FASE SFOLTIMENTO 
 

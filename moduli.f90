@@ -823,7 +823,7 @@ module Dark_Matter
   !####################
   integer,parameter :: ioDarkError=412 !La unit per il file che mi salva i vari modelli in cui la T_DM non converge
   integer :: ioDarkError_on_off !Per abilitare la scrittura di tutta la struttura in caso di errore
-
+  
   !#####################
   !Scrittura DarkCattura
   !#####################
@@ -849,11 +849,8 @@ module Dark_Matter
   !##########################
   !Variabili convergenza T_DM
   !##########################
-
-  integer :: N_cicli_extra_convergenza_DM,& !Cicli extra da fare quando voglio l'andamento per l'epsi ai cicli di convergenza successivi
-             on_off_Error_DM_aggiuntivi !Flag per attivare la stampa nel file DarkMatterERROR.DAT dell'andamento dell'epsi ai cicli
-             !successivi di convergenza dopo aver superato il limite max_cicli per cui considero che la DM non converga. 
-             !Se entro max_cicli+N_cicli_extra_convergenza_DM la T_DM converge allora stampa anche l'epsi che è andata a convergenza
+  
+  integer :: controllo_estremi_DM !Per abilitare controllo estremi ma da problemi di overflow sul calcolo della distribuzione radiale della DM
              
   real :: Max_Lumi_DM!Massima luminosità della DM, serve a rinormalizzare l'integrale dell'epsi per definire lo zero dell'integrale discretizato.
 

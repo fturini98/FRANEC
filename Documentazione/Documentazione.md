@@ -80,7 +80,8 @@ Per testare il codice, dopo la compilazione, si possono utilizzare 3 prinicpali 
 - **[X]** Sistemare il rapporto epsi_DM/epsi_tot, deve venire uguale su i due file
 - **[]** Cambia criterio criterio convergenza
 - **[]** File fase evolutiva out
-- **[]** Sistemare potenziale gravitazionale in epsi
+- **[X]** Sistemare potenziale gravitazionale in epsi
+- **[X]** Calcolarsi la costante di normalizazione co sumexp
 ## Cose da commentare
 
 - tutte le flag
